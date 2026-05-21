@@ -1066,9 +1066,11 @@ class App:
             lambda e: ctx.tk_popup(e.x_root, e.y_root)
         )
 
-        _btn(frame, '선택 항목 삭제', self._delete_selected, bg='#9E9E9E').grid(
-            row=6, column=0, sticky='w', padx=8, pady=(0, 6)
-        )
+        tk.Button(
+            frame, text='선택 항목 삭제', command=self._delete_selected,
+            bg='#9E9E9E', fg='white', activebackground='#9E9E9E',
+            relief='flat', font=('맑은 고딕', 9), padx=8, pady=4, cursor='hand2'
+        ).grid(row=6, column=0, sticky='w', padx=8, pady=(0, 6))
 
     # ── 탭 2: 위치 설정 ────────────────────────
     def _tab_calib(self, frame: ttk.Frame):
