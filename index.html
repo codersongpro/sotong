@@ -3,577 +3,701 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>충북 소통메신저 자동 사용자 선택 v1.4</title>
+  <title>소통메신저 자동 사용자 선택 — 충청북도교육청</title>
   <style>
     :root {
-      --primary: #1565C0;
-      --primary-dark: #0D47A1;
-      --primary-light: #1976D2;
-      --accent: #2196F3;
-      --accent-light: #E3F2FD;
-      --success: #2E7D32;
-      --success-bg: #E8F5E9;
-      --warn: #E65100;
-      --warn-bg: #FFF3E0;
-      --text: #212121;
-      --text-sub: #546E7A;
-      --border: #CFD8DC;
-      --bg: #F5F7FA;
-      --card: #FFFFFF;
+      --blue:        #1565C0;
+      --blue-dark:   #0D47A1;
+      --blue-mid:    #1976D2;
+      --blue-light:  #E3F2FD;
+      --blue-soft:   #BBDEFB;
+      --green:       #2E7D32;
+      --green-bg:    #E8F5E9;
+      --amber:       #E65100;
+      --amber-bg:    #FFF3E0;
+      --text:        #1A1A2E;
+      --text-sub:    #546E7A;
+      --border:      #E0E7EF;
+      --bg:          #F7F9FC;
+      --card:        #FFFFFF;
+      --radius:      14px;
+      --shadow:      0 2px 12px rgba(21,101,192,.09);
+      --shadow-lg:   0 8px 32px rgba(21,101,192,.14);
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'Malgun Gothic', '맑은 고딕', -apple-system, sans-serif;
+      font-family: 'Malgun Gothic', '맑은 고딕', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.7;
+      line-height: 1.75;
+      font-size: 15px;
     }
 
-    /* ── Header ── */
+    /* ─── 스크롤 부드럽게 ─── */
+    html { scroll-behavior: smooth; }
+
+    /* ─── 헤더 ─── */
     header {
-      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
-      color: white;
-      padding: 48px 24px 40px;
+      background: linear-gradient(140deg, var(--blue-dark) 0%, #1E88E5 100%);
+      color: #fff;
+      padding: 72px 24px 64px;
       text-align: center;
+      position: relative;
+      overflow: hidden;
     }
-    .header-badge {
-      display: inline-block;
-      background: rgba(255,255,255,0.18);
-      border: 1px solid rgba(255,255,255,0.35);
-      border-radius: 20px;
-      padding: 4px 16px;
-      font-size: 13px;
-      margin-bottom: 14px;
-      letter-spacing: 0.05em;
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
-    header h1 {
-      font-size: clamp(22px, 5vw, 34px);
-      font-weight: 700;
-      margin-bottom: 10px;
-      letter-spacing: -0.5px;
-    }
-    header p {
-      font-size: 16px;
-      opacity: 0.88;
-      max-width: 600px;
-      margin: 0 auto 28px;
-    }
-    .btn-download {
-      display: inline-block;
-      background: white;
-      color: var(--primary-dark);
-      font-size: 17px;
-      font-weight: 700;
-      padding: 14px 36px;
-      border-radius: 8px;
-      text-decoration: none;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.22);
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .btn-download:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.28);
-    }
-    .btn-download span { margin-right: 8px; font-size: 20px; }
-    .dl-note { margin-top: 10px; font-size: 13px; opacity: 0.75; }
+    .header-inner { position: relative; max-width: 680px; margin: 0 auto; }
 
-    /* ── Layout ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 999px;
+      padding: 5px 16px;
+      font-size: 13px;
+      letter-spacing: .04em;
+      margin-bottom: 20px;
+    }
+    .badge::before { content: '🏫'; font-size: 14px; }
+
+    header h1 {
+      font-size: clamp(24px, 5vw, 38px);
+      font-weight: 800;
+      letter-spacing: -.5px;
+      margin-bottom: 14px;
+      line-height: 1.3;
+    }
+    header h1 em {
+      font-style: normal;
+      background: linear-gradient(90deg, #90CAF9, #E3F2FD);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header .subtitle {
+      font-size: 16px;
+      opacity: .88;
+      margin-bottom: 36px;
+      line-height: 1.65;
+    }
+
+    .btn-dl {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      color: var(--blue-dark);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 15px 38px;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: var(--shadow-lg);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-dl:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,.22); }
+    .btn-dl .icon { font-size: 22px; }
+    .dl-sub { margin-top: 12px; font-size: 13px; opacity: .7; }
+
+    /* ─── 레이아웃 ─── */
     .container {
-      max-width: 860px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 0 20px;
     }
-    section { padding: 48px 0; }
+
+    section { padding: 64px 0; }
     section + section { border-top: 1px solid var(--border); }
 
+    .section-label {
+      display: inline-block;
+      background: var(--blue-light);
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
     h2 {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    h2 .icon { font-size: 26px; }
-
-    h3 {
-      font-size: 16px;
-      font-weight: 700;
+      font-size: 26px;
+      font-weight: 800;
       color: var(--text);
-      margin: 20px 0 8px;
+      margin-bottom: 8px;
+      letter-spacing: -.3px;
+    }
+    .section-desc {
+      color: var(--text-sub);
+      font-size: 15px;
+      margin-bottom: 36px;
     }
 
-    p { margin-bottom: 12px; color: var(--text-sub); }
-
-    /* ── Cards ── */
-    .card {
+    /* ─── 기능 카드 ─── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 16px;
+    }
+    .feature-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      text-align: center;
+      transition: box-shadow .18s, transform .18s, border-color .18s;
     }
-    .card-title {
-      font-size: 15px;
+    .feature-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+      border-color: var(--blue-soft);
+    }
+    .feature-card .f-icon { font-size: 36px; margin-bottom: 12px; display: block; }
+    .feature-card .f-name {
       font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 10px;
+      font-size: 15px;
+      color: var(--blue-dark);
+      margin-bottom: 6px;
+    }
+    .feature-card .f-desc { font-size: 13px; color: var(--text-sub); line-height: 1.55; }
+
+    /* ─── 사용 방법 단계 ─── */
+    .phase-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .phase-tab {
+      padding: 8px 20px;
+      border-radius: 999px;
+      border: 2px solid var(--border);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-sub);
+      background: var(--card);
+      transition: all .15s;
+    }
+    .phase-tab.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
     }
 
-    /* ── Step boxes ── */
-    .steps {
-      counter-reset: step;
+    .phase-panel { display: none; }
+    .phase-panel.active { display: block; }
+
+    .step-list {
       list-style: none;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-    .steps li {
+    .step-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px 20px 16px 64px;
-      position: relative;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
     }
-    .steps li::before {
-      counter-increment: step;
-      content: counter(step);
-      position: absolute;
-      left: 18px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 32px;
-      height: 32px;
-      background: var(--primary);
-      color: white;
+    .step-num {
+      min-width: 36px;
+      height: 36px;
+      background: var(--blue);
+      color: #fff;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      font-size: 14px;
+      font-weight: 800;
+      font-size: 15px;
+      flex-shrink: 0;
+      margin-top: 1px;
     }
-    .steps li strong { color: var(--text); display: block; margin-bottom: 2px; }
-    .steps li span { color: var(--text-sub); font-size: 14px; }
+    .step-body strong {
+      display: block;
+      font-size: 15px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .step-body span { font-size: 14px; color: var(--text-sub); line-height: 1.6; }
 
-    /* ── Alert boxes ── */
+    /* ─── 알림 박스 ─── */
     .alert {
-      border-radius: 8px;
-      padding: 16px 20px;
-      margin-bottom: 16px;
       display: flex;
       gap: 12px;
       align-items: flex-start;
-    }
-    .alert-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
-    .alert.warn { background: var(--warn-bg); border-left: 4px solid var(--warn); }
-    .alert.warn .alert-icon { color: var(--warn); }
-    .alert.info { background: var(--accent-light); border-left: 4px solid var(--accent); }
-    .alert.info .alert-icon { color: var(--accent); }
-    .alert.success { background: var(--success-bg); border-left: 4px solid var(--success); }
-    .alert.success .alert-icon { color: var(--success); }
-    .alert div { font-size: 14px; color: var(--text); }
-    .alert strong { color: var(--text); }
-
-    /* ── Code block ── */
-    code {
-      background: #ECEFF1;
-      color: #C62828;
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-size: 13px;
-      font-family: Consolas, 'Courier New', monospace;
-    }
-    pre {
-      background: #263238;
-      color: #ECEFF1;
-      padding: 18px 20px;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-size: 13px;
-      line-height: 1.8;
-      margin-bottom: 16px;
-    }
-
-    /* ── Tab method grid ── */
-    .method-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-    .method-card {
-      background: var(--card);
-      border: 2px solid var(--border);
       border-radius: 10px;
-      padding: 18px;
-      text-align: center;
-      transition: border-color 0.15s;
+      padding: 16px 18px;
+      margin-top: 16px;
+      font-size: 14px;
     }
-    .method-card:hover { border-color: var(--accent); }
-    .method-card .method-icon { font-size: 32px; margin-bottom: 8px; }
-    .method-card .method-name { font-weight: 700; color: var(--primary); margin-bottom: 4px; font-size: 15px; }
-    .method-card .method-desc { font-size: 13px; color: var(--text-sub); }
+    .alert-i { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .alert.warn  { background: var(--amber-bg); border-left: 4px solid var(--amber); }
+    .alert.info  { background: var(--blue-light); border-left: 4px solid var(--blue-mid); }
+    .alert.green { background: var(--green-bg); border-left: 4px solid var(--green); }
+    .alert strong { color: var(--text); }
+    .alert p { color: var(--text-sub); margin: 0; }
 
-    /* ── Developer info ── */
-    .dev-card {
-      background: linear-gradient(135deg, #E3F2FD, #F5F7FA);
-      border: 1px solid #90CAF9;
-      border-radius: 12px;
-      padding: 24px 28px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
+    /* ─── 복붙 형식 예시 ─── */
+    .paste-demo {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-top: 12px;
     }
-    .dev-avatar {
-      width: 56px;
-      height: 56px;
-      background: var(--primary);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 24px;
-      flex-shrink: 0;
+    .paste-demo-head {
+      background: var(--blue);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
     }
-    .dev-name { font-size: 18px; font-weight: 700; color: var(--primary-dark); }
-    .dev-role { font-size: 13px; color: var(--text-sub); margin-bottom: 4px; }
-    .dev-contact a { color: var(--primary-light); text-decoration: none; font-size: 14px; }
-    .dev-contact a:hover { text-decoration: underline; }
+    .paste-demo-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 8px 16px;
+      font-size: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .paste-demo-row:nth-child(even) { background: var(--bg); }
+    .paste-demo-row .col-org { color: var(--text-sub); }
+    .paste-demo-row .col-name { font-weight: 600; color: var(--text); }
 
-    /* ── FAQ ── */
+    /* ─── FAQ ─── */
+    .faq-list { display: flex; flex-direction: column; gap: 8px; }
     details {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-bottom: 8px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: box-shadow .18s;
     }
+    details[open] { box-shadow: var(--shadow); }
     details summary {
-      padding: 14px 18px;
-      font-weight: 600;
+      padding: 16px 20px;
+      font-weight: 700;
+      font-size: 15px;
       cursor: pointer;
-      color: var(--text);
       list-style: none;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      color: var(--text);
+      user-select: none;
     }
-    details summary::after { content: '＋'; color: var(--primary); font-size: 18px; }
+    details summary::-webkit-details-marker { display: none; }
+    details summary::after {
+      content: '＋';
+      color: var(--blue);
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-left: 12px;
+      line-height: 1;
+    }
     details[open] summary::after { content: '－'; }
-    details .faq-body {
-      padding: 0 18px 16px;
+    .faq-body {
+      padding: 16px 20px;
       font-size: 14px;
       color: var(--text-sub);
+      line-height: 1.75;
       border-top: 1px solid var(--border);
-      padding-top: 12px;
-      margin-top: 0;
+    }
+    .faq-body strong { color: var(--text); }
+
+    /* ─── 개발자 카드 ─── */
+    .dev-card {
+      background: linear-gradient(135deg, #E3F2FD 0%, #F7F9FC 100%);
+      border: 1px solid var(--blue-soft);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .dev-avatar {
+      width: 64px; height: 64px;
+      background: var(--blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(21,101,192,.25);
+    }
+    .dev-name { font-size: 20px; font-weight: 800; color: var(--blue-dark); margin-bottom: 4px; }
+    .dev-role { font-size: 13px; color: var(--text-sub); margin-bottom: 8px; }
+    .dev-contact {
+      font-size: 14px;
+      color: var(--text-sub);
+    }
+    .dev-contact a {
+      color: var(--blue-mid);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .dev-contact a:hover { text-decoration: underline; }
+    .dev-version {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      margin-top: 8px;
     }
 
-    /* ── Footer ── */
+    /* ─── 푸터 ─── */
     footer {
-      background: #1A237E;
-      color: rgba(255,255,255,0.7);
+      background: #0D1B4B;
+      color: rgba(255,255,255,.65);
       text-align: center;
-      padding: 28px 16px;
+      padding: 36px 20px;
       font-size: 13px;
+      line-height: 1.9;
     }
-    footer strong { color: white; }
+    footer strong { color: #fff; }
+    footer a { color: rgba(255,255,255,.5); text-decoration: none; }
+    footer a:hover { color: rgba(255,255,255,.85); }
 
-    @media (max-width: 600px) {
-      header { padding: 36px 16px 32px; }
+    /* ─── 반응형 ─── */
+    @media (max-width: 640px) {
+      header { padding: 52px 16px 48px; }
+      section { padding: 48px 0; }
+      h2 { font-size: 22px; }
       .dev-card { flex-direction: column; text-align: center; }
+      .dev-avatar { margin: 0 auto; }
+      .feature-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 400px) {
+      .feature-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════ HEADER ═══════════════ -->
+<!-- ════════════ HEADER ════════════ -->
 <header>
-  <div class="header-badge">충청북도교육청 소통메신저 자동화 도구</div>
-  <h1>🤖 소통메신저 자동 사용자 선택</h1>
-  <p>엑셀·한글 명단을 붙여 넣으면 소통메신저에서 수백 명을 자동 검색·선택합니다.<br>
-     <strong style="color:#fff;">Python 없이 바로 실행 가능 (.exe)</strong></p>
-  <a class="btn-download"
-     href="https://github.com/codersongpro/sotong/releases/latest"
-     target="_blank" rel="noopener">
-    <span>⬇</span> 프로그램 다운로드 (.exe)
-  </a>
-  <div class="dl-note">Windows 전용 · 무설치 · 최신 버전 자동 연결</div>
+  <div class="header-inner">
+    <div class="badge">충청북도교육청 소통메신저</div>
+    <h1>명단 대량 발송을<br><em>클릭 한 번</em>으로</h1>
+    <p class="subtitle">
+      엑셀·한글 문서의 수신자 명단을 붙여넣기만 하면<br>
+      소통메신저에서 자동으로 검색하고 선택합니다.
+    </p>
+    <a class="btn-dl"
+       href="https://github.com/codersongpro/sotong/releases/latest"
+       target="_blank" rel="noopener">
+      <span class="icon">⬇</span>
+      무료 다운로드 (.exe)
+    </a>
+    <div class="dl-sub">Windows 전용 · 무설치 · 더블클릭으로 바로 실행</div>
+  </div>
 </header>
 
 <div class="container">
 
-  <!-- ═══════════════ SECTION 1: QUICK START ═══════════════ -->
-  <section id="quickstart">
-    <h2><span class="icon">🚀</span>Python 없어도 됩니다 — 5분 만에 시작하기</h2>
-
-    <div class="alert success">
-      <div class="alert-icon">✅</div>
-      <div><strong>이 프로그램은 설치 없이 바로 실행되는 .exe 파일로 제공됩니다.</strong><br>
-        Python을 설치하지 않아도 됩니다. 아래 순서대로 따라 하세요.</div>
-    </div>
-
-    <ol class="steps">
-      <li>
-        <strong>프로그램 다운로드</strong>
-        <span>위의 <em>프로그램 다운로드</em> 버튼을 클릭하면 GitHub 릴리즈 페이지로 이동합니다.
-          <code>ChungbukMessenger_AutoSelect.exe</code> 파일을 클릭해 저장하세요.</span>
-      </li>
-      <li>
-        <strong>보안 경고 허용</strong>
-        <span>Windows Defender SmartScreen이 뜨면 <strong>"추가 정보"</strong> →
-          <strong>"실행"</strong>을 클릭하세요.
-          (소규모 배포 프로그램은 처음 실행 시 경고가 표시될 수 있습니다.)</span>
-      </li>
-      <li>
-        <strong>프로그램 실행</strong>
-        <span>다운로드된 <code>.exe</code> 파일을 더블클릭하면 바로 실행됩니다.
-          별도 설치 과정 없음.</span>
-      </li>
-      <li>
-        <strong>소통메신저 로그인 후 준비</strong>
-        <span>충북 소통메신저에 로그인하고 <em>사용자 선택</em> 창을 열어 두세요.
-          이 프로그램 창과 나란히 배치하면 편리합니다.</span>
-      </li>
-      <li>
-        <strong>명단 입력 → 위치 설정(최초 1회) → 자동 선택 시작</strong>
-        <span>아래 사용 방법을 참고하세요.</span>
-      </li>
-    </ol>
-  </section>
-
-  <!-- ═══════════════ SECTION 2: WHAT IT DOES ═══════════════ -->
-  <section id="about">
-    <h2><span class="icon">💡</span>이 프로그램이 하는 일</h2>
-    <p>충청북도교육청 소통메신저에서 수신자를 추가할 때, 수십~수백 명의 이름을
-       일일이 검색하고 클릭하는 반복 작업을 <strong>자동화</strong>합니다.</p>
-
-    <div class="method-grid">
-      <div class="method-card">
-        <div class="method-icon">📊</div>
-        <div class="method-name">엑셀 파일 지원</div>
-        <div class="method-desc">.xlsx 파일에서 소속기관·이름을 자동 추출</div>
-      </div>
-      <div class="method-card">
-        <div class="method-icon">📄</div>
-        <div class="method-name">한글 HWP 지원</div>
-        <div class="method-desc">.hwp / .hwpx 파일 직접 읽기 가능</div>
-      </div>
-      <div class="method-card">
-        <div class="method-icon">📋</div>
-        <div class="method-name">복사·붙여넣기</div>
-        <div class="method-desc">문서에서 Ctrl+C 복사 후 바로 붙여넣기</div>
-      </div>
-      <div class="method-card">
-        <div class="method-icon">🔍</div>
-        <div class="method-name">오타 자동 보정</div>
-        <div class="method-desc">소속기관명 오타도 DB 기반 자동 매칭</div>
-      </div>
-    </div>
-
-    <div class="alert info">
-      <div class="alert-icon">ℹ</div>
-      <div><strong>소속기관 DB 내장:</strong>
-        충청북도교육청 직속기관 12개, 고등학교 84개, 중학교 132개, 초등학교 257개,
-        특수·각종학교 9개의 명칭이 내장되어 있어 오타가 있어도 자동으로 정확한 명칭으로 변환합니다.</div>
-    </div>
-  </section>
-
-  <!-- ═══════════════ SECTION 3: HOW TO USE ═══════════════ -->
-  <section id="howto">
-    <h2><span class="icon">📖</span>사용 방법</h2>
-
-    <!-- Tab 1 -->
-    <div class="card">
-      <div class="card-title">① 탭 1 — 명단 입력</div>
-      <p>소속기관과 이름이 들어있는 명단을 세 가지 방법으로 입력할 수 있습니다.</p>
-      <div class="method-grid" style="margin-bottom:0">
-        <div class="method-card">
-          <div class="method-icon">📂</div>
-          <div class="method-name">방법 A: 엑셀 파일</div>
-          <div class="method-desc">[엑셀 파일 열기] → .xlsx 선택 → [명단 추출 →]</div>
-        </div>
-        <div class="method-card">
-          <div class="method-icon">📃</div>
-          <div class="method-name">방법 B: HWP 파일</div>
-          <div class="method-desc">[HWP 파일 열기] → .hwp 선택 → [명단 추출 →]</div>
-        </div>
-        <div class="method-card">
-          <div class="method-icon">📋</div>
-          <div class="method-name">방법 C: 복사·붙여넣기</div>
-          <div class="method-desc">표를 Ctrl+C 복사 → 입력창에 Ctrl+V → [명단 추출 →]</div>
-        </div>
-      </div>
-      <br>
-      <div class="alert info">
-        <div class="alert-icon">ℹ</div>
-        <div>인식 가능한 형식: <code>소속기관&nbsp;&nbsp;이름</code> (탭 구분) 또는 줄마다 소속↔이름 교대.
-          소속기관명의 오타도 자동 보정됩니다.</div>
-      </div>
-    </div>
-
-    <!-- Tab 2 -->
-    <div class="card">
-      <div class="card-title">② 탭 2 — 위치 설정 (최초 1회만)</div>
-      <p>소통메신저 창의 어느 위치를 클릭해야 하는지 알려주는 과정입니다.
-         한 번만 설정하면 이후 자동으로 기억합니다.</p>
-      <ol class="steps">
-        <li>
-          <strong>STEP 1 — 검색 입력창 위치</strong>
-          <span>소통메신저 검색창 위에서 [📍 위치 설정]을 클릭해 3초 안에 검색칸 위에 마우스를 올리세요.</span>
-        </li>
-        <li>
-          <strong>STEP 2 — 결과 첫 번째 위치</strong>
-          <span>임의의 이름 검색 후 결과 첫 번째 줄 위에서 [📍 위치 설정]을 클릭하세요.</span>
-        </li>
-        <li>
-          <strong>STEP 3 — 결과 없음 감지 (선택)</strong>
-          <span>존재하지 않는 이름 검색 후 결과가 빈 상태에서 [📍 픽셀 캡처]를 클릭하세요.
-            이후 결과 없는 경우 자동으로 ✗ 처리합니다.</span>
-        </li>
-        <li>
-          <strong>[✅ 설정 저장] 클릭</strong>
-          <span>반드시 저장해야 다음에도 설정이 유지됩니다.</span>
-        </li>
-      </ol>
-    </div>
-
-    <!-- Tab 3 -->
-    <div class="card">
-      <div class="card-title">③ 탭 3 — 자동 선택 시작</div>
-      <ol class="steps">
-        <li>
-          <strong>소통메신저 준비</strong>
-          <span>[사용자 선택] → [전체조직] 탭 열기</span>
-        </li>
-        <li>
-          <strong>[▶ 자동 선택 시작] 클릭</strong>
-          <span>프로그램이 자동으로 검색·더블클릭을 반복합니다. 마우스를 건드리지 마세요.</span>
-        </li>
-        <li>
-          <strong>진행 상황 확인</strong>
-          <span>로그창에 ✓(성공) / ✗(결과 없음)이 표시됩니다. 완료 시 결과가 요약됩니다.</span>
-        </li>
-      </ol>
-      <div class="alert warn">
-        <div class="alert-icon">⚠</div>
-        <div><strong>긴급 중지:</strong> 마우스를 화면 <strong>왼쪽 위 모서리(0,0)</strong>로
-          빠르게 이동하거나 [■ 중지] 버튼을 클릭하세요.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════ SECTION 4: PYTHON USERS ═══════════════ -->
-  <section id="python">
-    <h2><span class="icon">🐍</span>Python 개발자용 — 소스 코드 실행</h2>
-    <p>소스 코드를 직접 실행하거나 수정하고 싶은 경우, Python 환경에서 아래 방법을 사용하세요.</p>
-
-    <div class="alert warn">
-      <div class="alert-icon">⚠</div>
-      <div>일반 사용자는 위의 <strong>.exe 파일 다운로드</strong>를 사용하세요.
-        Python 설치가 필요 없습니다.</div>
-    </div>
-
-    <h3>1. Python 설치 (미설치 시)</h3>
-    <p><a href="https://www.python.org/downloads/" target="_blank" rel="noopener"
-          style="color:var(--primary-light)">python.org/downloads</a>에서 Python 3.10 이상을 설치하세요.
-       설치 시 <strong>"Add Python to PATH"</strong>에 반드시 체크하세요.</p>
-
-    <h3>2. 필수 패키지 설치</h3>
-    <pre>pip install pyautogui pyperclip openpyxl</pre>
-
-    <h3>3. 실행</h3>
-    <pre>python main.py</pre>
-
-    <h3>4. 소스 코드 / 기여</h3>
-    <p>GitHub 저장소:
-      <a href="https://github.com/codersongpro/sotong" target="_blank" rel="noopener"
-         style="color:var(--primary-light)">github.com/codersongpro/sotong</a>
+  <!-- ════════════ 기능 ════════════ -->
+  <section id="features">
+    <div class="section-label">주요 기능</div>
+    <h2>반복 작업, 이제 맡기세요</h2>
+    <p class="section-desc">
+      수십 명, 수백 명의 수신자를 일일이 검색하고 클릭하는 작업을 자동으로 처리합니다.
     </p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="f-icon">📊</span>
+        <div class="f-name">엑셀 파일</div>
+        <div class="f-desc">.xlsx 파일에서 소속기관과 이름을 자동으로 읽어옵니다</div>
+      </div>
+      <div class="feature-card">
+        <span class="f-icon">📄</span>
+        <div class="f-name">한글 HWP</div>
+        <div class="f-desc">.hwp / .hwpx 파일도 직접 열어 명단을 추출합니다</div>
+      </div>
+      <div class="feature-card">
+        <span class="f-icon">📋</span>
+        <div class="f-name">복사·붙여넣기</div>
+        <div class="f-desc">표를 Ctrl+C로 복사 후 바로 붙여넣기로도 사용 가능</div>
+      </div>
+      <div class="feature-card">
+        <span class="f-icon">🔍</span>
+        <div class="f-name">오타 자동 보정</div>
+        <div class="f-desc">소속기관명에 오타가 있어도 DB 기반으로 자동 매칭합니다</div>
+      </div>
+    </div>
+
+    <div class="alert green" style="margin-top:24px;">
+      <span class="alert-i">✅</span>
+      <div>
+        <strong>충청북도교육청 기관 DB 내장</strong>
+        <p>직속기관 12 · 고등학교 84 · 중학교 132 · 초등학교 257 · 특수·각종학교 9개 기관명이 포함되어 있습니다.</p>
+      </div>
+    </div>
   </section>
 
-  <!-- ═══════════════ SECTION 5: FAQ ═══════════════ -->
+  <!-- ════════════ 사용 방법 ════════════ -->
+  <section id="howto">
+    <div class="section-label">사용 방법</div>
+    <h2>3단계로 끝납니다</h2>
+    <p class="section-desc">처음 사용하시는 분도 아래 순서대로 따라 하시면 됩니다.</p>
+
+    <!-- 탭 버튼 -->
+    <div class="phase-tabs" role="tablist">
+      <button class="phase-tab active" onclick="switchTab(this,'tab1')">① 명단 입력</button>
+      <button class="phase-tab"        onclick="switchTab(this,'tab2')">② 위치 설정 (최초 1회)</button>
+      <button class="phase-tab"        onclick="switchTab(this,'tab3')">③ 자동 선택 시작</button>
+    </div>
+
+    <!-- 탭 1 -->
+    <div id="tab1" class="phase-panel active">
+      <ul class="step-list">
+        <li class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>소통메신저에서 발송 창 열기</strong>
+            <span>소통메신저 오른쪽 위 편지 아이콘(✉) 클릭 → <strong>'쪽지 작성'</strong> 또는 <strong>'대화하기'</strong> 선택</span>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>[사용자 선택] → [전체조직] 탭 열기</strong>
+            <span>메시지 창에서 [사용자 선택] 버튼 클릭 후 상단 탭에서 <strong>전체조직</strong>을 선택하세요.</span>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>명단 붙여넣기 또는 파일 열기</strong>
+            <span>
+              엑셀에서 <strong>소속기관(A열)과 이름(B열)</strong>을 함께 선택해 복사(Ctrl+C)한 뒤 붙여넣기 하세요.
+              또는 엑셀·HWP 파일을 직접 열 수 있습니다.
+            </span>
+
+            <div class="paste-demo">
+              <div class="paste-demo-head">
+                <span>A열 — 소속기관</span>
+                <span>B열 — 이름</span>
+              </div>
+              <div class="paste-demo-row">
+                <span class="col-org">충주중학교</span>
+                <span class="col-name">홍길동</span>
+              </div>
+              <div class="paste-demo-row">
+                <span class="col-org">청주고등학교</span>
+                <span class="col-name">김철수</span>
+              </div>
+              <div class="paste-demo-row">
+                <span class="col-org">충청북도교육청</span>
+                <span class="col-name">이영희</span>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>[명단 추출 →] 클릭</strong>
+            <span>소속기관과 이름이 자동으로 인식되어 아래 목록에 표시됩니다. 오타가 있어도 자동 보정됩니다.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 탭 2 -->
+    <div id="tab2" class="phase-panel">
+      <div class="alert info" style="margin-bottom:20px; margin-top:0;">
+        <span class="alert-i">ℹ</span>
+        <div>
+          <strong>최초 1회만 설정하면 됩니다.</strong>
+          <p>소통메신저 창 위치가 바뀌지 않는 한 재설정 불필요합니다.</p>
+        </div>
+      </div>
+      <ul class="step-list">
+        <li class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>STEP 1 — 검색 입력창 위치 설정</strong>
+            <span>[📍 위치 설정] 클릭 → 3초 안에 소통메신저 검색 입력칸 위로 마우스를 이동하세요.</span>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>STEP 2 — 결과 첫 번째 항목 위치 설정</strong>
+            <span>임의의 이름을 검색 후 결과 첫 번째 줄 위에서 [📍 위치 설정]을 클릭하세요.</span>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>STEP 3 — 결과 없음 감지 설정 (선택)</strong>
+            <span>존재하지 않는 이름 검색 후 결과가 빈 상태에서 [📍 픽셀 캡처] 클릭. 이후 검색 결과가 없으면 자동으로 ✗ 처리합니다.</span>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>[✅ 설정 저장] 클릭</strong>
+            <span>반드시 저장해야 다음에도 설정이 유지됩니다.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 탭 3 -->
+    <div id="tab3" class="phase-panel">
+      <ul class="step-list">
+        <li class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>[▶ 자동 선택 시작] 클릭</strong>
+            <span>소통메신저 사용자 선택 창이 열려있는 상태에서 시작하세요.</span>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>자동 진행 — 마우스를 움직이지 마세요</strong>
+            <span>프로그램이 이름을 검색하고 자동으로 선택합니다. 진행 상황이 로그에 실시간 표시됩니다.</span>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>완료 — 결과 확인</strong>
+            <span>✓ 성공 / ✗ 실패 건수가 요약됩니다. 빨간색으로 표시된 항목은 검색 결과가 없는 경우입니다.</span>
+          </div>
+        </li>
+      </ul>
+      <div class="alert warn">
+        <span class="alert-i">⚠</span>
+        <div>
+          <strong>긴급 중지 방법</strong>
+          <p>마우스를 화면 <strong>왼쪽 위 모서리(0,0)</strong>로 빠르게 이동하거나 [■ 중지] 버튼을 클릭하세요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ FAQ ════════════ -->
   <section id="faq">
-    <h2><span class="icon">❓</span>자주 묻는 질문</h2>
+    <div class="section-label">FAQ</div>
+    <h2>자주 묻는 질문</h2>
+    <p class="section-desc">궁금한 점이 있으면 아래에서 확인하세요.</p>
 
-    <details>
-      <summary>소속기관 이름이 없거나 '소속없음'으로 처리돼요.</summary>
-      <div class="faq-body">
-        DB에 등록되지 않은 소속기관명이거나 오타가 심한 경우입니다.
-        입력창에서 직접 <code>소속기관[탭]이름</code> 형식으로 수정 후 [명단 추출 →]을 다시 클릭하세요.
-      </div>
-    </details>
-    <details>
-      <summary>프로그램이 엉뚱한 곳을 클릭해요.</summary>
-      <div class="faq-body">
-        소통메신저 창 위치가 바뀌었을 수 있습니다.
-        [2. 위치 설정] 탭에서 위치를 다시 설정하고 [✅ 설정 저장]을 눌러주세요.
-      </div>
-    </details>
-    <details>
-      <summary>Windows SmartScreen 경고가 뜨면 어떻게 하나요?</summary>
-      <div class="faq-body">
-        <strong>추가 정보</strong>를 클릭 → <strong>실행</strong>을 선택하세요.
-        이 프로그램은 소규모 배포 .exe로, 코드 서명 인증서가 없어 경고가 표시될 수 있으나
-        안전한 파일입니다. 소스 코드는 GitHub에서 직접 확인할 수 있습니다.
-      </div>
-    </details>
-    <details>
-      <summary>동명이인이 있을 때 어떻게 하나요?</summary>
-      <div class="faq-body">
-        [2. 위치 설정] 탭에서 <strong>수동 확인 모드</strong>를 체크하세요.
-        검색 후 [▶▶ 계속] 버튼이 활성화되면, 소통메신저 결과에서 직접 더블클릭한 뒤 [계속]을 누릅니다.
-      </div>
-    </details>
-    <details>
-      <summary>HWP 파일이 열리지 않아요.</summary>
-      <div class="faq-body">
-        한/글 프로그램이 설치되어 있지 않으면 일부 .hwp 파일이 열리지 않을 수 있습니다.
-        한글 문서를 직접 열어 해당 표를 <code>Ctrl+C</code>로 복사한 뒤,
-        프로그램 입력창에 <code>Ctrl+V</code>로 붙여넣어 사용하세요.
-      </div>
-    </details>
-    <details>
-      <summary>속도가 너무 빠르거나 오류가 자주 발생해요.</summary>
-      <div class="faq-body">
-        [2. 위치 설정] 탭의 <strong>검색 후 대기 시간</strong>을 늘려보세요.
-        인터넷이 느린 환경에서는 1.5~2.5초, 빠른 환경에서는 0.8~1.2초가 적당합니다.
-      </div>
-    </details>
+    <div class="faq-list">
+
+      <details>
+        <summary>다운로드 후 실행이 안 돼요. Windows 경고가 뜹니다.</summary>
+        <div class="faq-body">
+          <strong>추가 정보</strong>를 클릭한 뒤 <strong>실행</strong>을 선택하세요.<br>
+          소규모 배포 프로그램은 코드 서명 인증서가 없어 Windows SmartScreen 경고가 표시될 수 있습니다. 소스 코드는 GitHub에서 누구나 확인할 수 있습니다.
+        </div>
+      </details>
+
+      <details>
+        <summary>소속기관이 '소속없음'으로 표시돼요.</summary>
+        <div class="faq-body">
+          DB에 없는 기관명이거나 오타가 심한 경우입니다. 입력 시 소속기관명을 정확하게 입력하거나,
+          소속기관 없이 이름만 입력해도 검색이 가능합니다.
+        </div>
+      </details>
+
+      <details>
+        <summary>프로그램이 엉뚱한 위치를 클릭해요.</summary>
+        <div class="faq-body">
+          소통메신저 창 위치가 바뀌었을 수 있습니다.
+          <strong>[2. 위치 설정]</strong> 탭에서 위치를 다시 설정하고 저장하세요.
+        </div>
+      </details>
+
+      <details>
+        <summary>동명이인이 있을 때는 어떻게 하나요?</summary>
+        <div class="faq-body">
+          [2. 위치 설정] 탭에서 <strong>수동 확인 모드</strong>를 체크하세요.
+          각 이름 검색 후 소통메신저에서 직접 더블클릭하고, [▶▶ 계속] 버튼을 눌러 진행합니다.
+        </div>
+      </details>
+
+      <details>
+        <summary>HWP 파일이 열리지 않아요.</summary>
+        <div class="faq-body">
+          한/글 프로그램이 설치되지 않은 경우 일부 형식이 지원되지 않을 수 있습니다.
+          한글 문서를 직접 열어 표를 <strong>Ctrl+C</strong>로 복사한 뒤 입력창에 붙여넣으세요.
+        </div>
+      </details>
+
+      <details>
+        <summary>속도를 조절할 수 있나요?</summary>
+        <div class="faq-body">
+          [2. 위치 설정] 탭의 <strong>검색 후 대기 시간</strong>에서 조절하세요.
+          기본값은 0.5초이며, 인터넷이 느린 환경에서는 1.5~2초로 늘려보세요.
+        </div>
+      </details>
+
+    </div>
   </section>
 
-  <!-- ═══════════════ SECTION 6: DEVELOPER ═══════════════ -->
+  <!-- ════════════ 개발자 ════════════ -->
   <section id="developer">
-    <h2><span class="icon">👨‍💻</span>개발자 정보</h2>
+    <div class="section-label">개발자</div>
+    <h2>만든 사람</h2>
+
     <div class="dev-card">
       <div class="dev-avatar">👤</div>
       <div>
         <div class="dev-name">송동석</div>
-        <div class="dev-role">Teacher &nbsp;·&nbsp; Data Analytics &nbsp;·&nbsp; App Developer</div>
+        <div class="dev-role">Teacher · Data Analytics · App Developer</div>
         <div class="dev-contact">
           협업 및 피드백:&nbsp;
           <a href="mailto:dungst.me@gmail.com">dungst.me@gmail.com</a>
         </div>
-        <div style="font-size:13px; color:var(--text-sub); margin-top:6px;">
-          충청북도교육청 소통메신저 자동화 도구 &nbsp;·&nbsp; v1.4
-        </div>
+        <div class="dev-version">v1.5</div>
       </div>
     </div>
   </section>
 
 </div><!-- /container -->
 
-<!-- ═══════════════ FOOTER ═══════════════ -->
+<!-- ════════════ FOOTER ════════════ -->
 <footer>
-  <strong>충북 소통메신저 자동 사용자 선택 v1.4</strong><br>
-  Developed by 송동석 &nbsp;|&nbsp; 충청북도교육청<br>
-  <a href="https://github.com/codersongpro/sotong" target="_blank" rel="noopener"
-     style="color:rgba(255,255,255,0.6); font-size:13px;">github.com/codersongpro/sotong</a>
+  <strong>충북 소통메신저 자동 사용자 선택</strong><br>
+  Developed by 송동석 &nbsp;·&nbsp; 충청북도교육청<br>
+  <a href="https://github.com/codersongpro/sotong" target="_blank" rel="noopener">
+    github.com/codersongpro/sotong
+  </a>
 </footer>
+
+<script>
+  function switchTab(btn, id) {
+    document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.phase-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(id).classList.add('active');
+  }
+</script>
 
 </body>
 </html>
