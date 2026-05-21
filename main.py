@@ -995,59 +995,74 @@ class App:
     # ── 탭 1: 명단 입력 ────────────────────────
     def _tab_input(self, frame: ttk.Frame):
         frame.columnconfigure(0, weight=1)
-        frame.rowconfigure(3, weight=1)
+        frame.rowconfigure(2, weight=1)
+        frame.rowconfigure(5, weight=2)
+
+        # ① 입력 형식 안내 박스
+        guide = tk.Frame(frame, bg='#E3F2FD', bd=1, relief='solid')
+        guide.grid(row=0, column=0, sticky='ew', padx=10, pady=(10, 4))
+        guide.columnconfigure(0, weight=1)
 
         tk.Label(
-            frame,
-            text='엑셀·한글 문서에서 명단을 복사(Ctrl+C)하여 아래에 붙여넣기 하거나,\n'
-                 '파일을 직접 여세요.  소속기관명과 이름이 포함된 형식이면 됩니다.',
-            fg='#555', font=('맑은 고딕', 9), justify='left', anchor='w'
-        ).grid(row=0, column=0, sticky='w', padx=10, pady=(10, 4))
+            guide,
+            text='📋  명단 붙여넣기 형식 안내',
+            bg='#E3F2FD', fg='#0D47A1', font=('맑은 고딕', 9, 'bold'), anchor='w'
+        ).grid(row=0, column=0, sticky='w', padx=10, pady=(6, 2))
 
-        btn_frame = tk.Frame(frame, bg='#F5F7FA')
-        btn_frame.grid(row=1, column=0, sticky='ew', padx=8, pady=4)
+        tk.Label(
+            guide,
+            text='엑셀에서 소속기관(A열)과 이름(B열)을 함께 선택한 뒤 복사(Ctrl+C)하고 아래에 붙여넣기 하세요.\n'
+                 '예)  충주중학교    홍길동\n'
+                 '     청주고등학교  김철수\n'
+                 '소속기관이 없는 경우 이름만 입력해도 됩니다. 엑셀·HWP 파일을 직접 열어도 됩니다.',
+            bg='#E3F2FD', fg='#333', font=('맑은 고딕', 9), justify='left', anchor='w'
+        ).grid(row=1, column=0, sticky='w', padx=10, pady=(0, 8))
 
-        def _btn(parent, text, cmd, bg='#607D8B', fg='white'):
-            b = tk.Button(parent, text=text, command=cmd, bg=bg, fg=fg,
-                          activebackground=bg, relief='flat',
-                          font=('맑은 고딕', 9), padx=8, pady=4, cursor='hand2')
-            b.pack(side='left', padx=3)
-            return b
+        # ② 파일 열기 버튼 행
+        file_btn_frame = tk.Frame(frame, bg='#F5F7FA')
+        file_btn_frame.grid(row=1, column=0, sticky='ew', padx=8, pady=(0, 2))
 
-        _btn(btn_frame, '엑셀 파일 열기 (.xlsx)', self._open_excel)
-        _btn(btn_frame, 'HWP 파일 열기 (.hwp)', self._open_hwp)
-        _btn(btn_frame, '명단 추출 →', self._parse, bg='#1565C0')
-        _btn(btn_frame, '초기화', self._clear_input, bg='#9E9E9E')
+        for text, cmd, bg in [
+            ('엑셀 파일 열기 (.xlsx)', self._open_excel, '#607D8B'),
+            ('HWP 파일 열기 (.hwp)',   self._open_hwp,   '#607D8B'),
+        ]:
+            tk.Button(
+                file_btn_frame, text=text, command=cmd,
+                bg=bg, fg='white', activebackground=bg,
+                relief='flat', font=('맑은 고딕', 9), padx=8, pady=4, cursor='hand2'
+            ).pack(side='left', padx=3)
 
+        # ③ 텍스트 입력 영역
         self.input_text = scrolledtext.ScrolledText(
-            frame, height=9, font=('맑은 고딕', 9), wrap='none'
+            frame, height=8, font=('맑은 고딕', 9), wrap='none'
         )
         self.input_text.grid(row=2, column=0, sticky='nsew', padx=8, pady=4)
 
-        ttk.Separator(frame, orient='horizontal').grid(
-            row=3, column=0, sticky='ew', padx=8, pady=2
-        )
+        # ④ 추출 버튼 행
+        action_frame = tk.Frame(frame, bg='#F5F7FA')
+        action_frame.grid(row=3, column=0, sticky='ew', padx=8, pady=(0, 4))
 
-        parse_status_row = tk.Frame(frame, bg='#F5F7FA')
-        parse_status_row.grid(row=4, column=0, sticky='ew', padx=8)
-        parse_status_row.columnconfigure(0, weight=1)
+        for text, cmd, bg in [
+            ('명단 추출 →', self._parse,       '#1565C0'),
+            ('초기화',       self._clear_input, '#9E9E9E'),
+        ]:
+            tk.Button(
+                action_frame, text=text, command=cmd,
+                bg=bg, fg='white', activebackground=bg,
+                relief='flat', font=('맑은 고딕', 9, 'bold'), padx=12, pady=5, cursor='hand2'
+            ).pack(side='left', padx=3)
 
+        # ⑤ 추출 결과 상태 라벨
         self.parse_status = tk.Label(
-            parse_status_row, text='', fg='#666', font=('맑은 고딕', 9), anchor='w'
+            frame, text='', fg='#555', font=('맑은 고딕', 9), anchor='w'
         )
-        self.parse_status.grid(row=0, column=0, sticky='w')
+        self.parse_status.grid(row=4, column=0, sticky='w', padx=12, pady=(0, 2))
 
-        tk.Label(
-            parse_status_row,
-            text='■ 빨간색 = 검색 결과 없음',
-            fg='#B71C1C', font=('맑은 고딕', 8), anchor='e'
-        ).grid(row=0, column=1, sticky='e', padx=(0, 4))
-
+        # ⑥ 추출된 명단 리스트
         list_frame = tk.Frame(frame)
-        list_frame.grid(row=5, column=0, sticky='nsew', padx=8, pady=(2, 4))
+        list_frame.grid(row=5, column=0, sticky='nsew', padx=8, pady=(0, 4))
         list_frame.columnconfigure(0, weight=1)
         list_frame.rowconfigure(0, weight=1)
-        frame.rowconfigure(5, weight=2)
 
         self.parsed_list = tk.Listbox(
             list_frame, font=('맑은 고딕', 9), selectmode='extended',
@@ -1059,18 +1074,25 @@ class App:
         sb.grid(row=0, column=1, sticky='ns')
         self.parsed_list.config(yscrollcommand=sb.set)
 
-        ctx = tk.Menu(self.root, tearoff=0)
-        ctx.add_command(label='삭제', command=self._delete_selected)
-        self.parsed_list.bind(
-            '<Button-3>',
-            lambda e: ctx.tk_popup(e.x_root, e.y_root)
-        )
+        # ⑦ 하단 버튼 + 범례
+        bottom_frame = tk.Frame(frame, bg='#F5F7FA')
+        bottom_frame.grid(row=6, column=0, sticky='ew', padx=8, pady=(0, 6))
+        bottom_frame.columnconfigure(1, weight=1)
 
         tk.Button(
-            frame, text='선택 항목 삭제', command=self._delete_selected,
+            bottom_frame, text='선택 항목 삭제', command=self._delete_selected,
             bg='#9E9E9E', fg='white', activebackground='#9E9E9E',
-            relief='flat', font=('맑은 고딕', 9), padx=8, pady=4, cursor='hand2'
-        ).grid(row=6, column=0, sticky='w', padx=8, pady=(0, 6))
+            relief='flat', font=('맑은 고딕', 9), padx=8, pady=3, cursor='hand2'
+        ).grid(row=0, column=0, sticky='w')
+
+        tk.Label(
+            bottom_frame, text='● 빨간색 항목 = 자동 선택 실패 (검색 결과 없음)',
+            fg='#B71C1C', font=('맑은 고딕', 8), bg='#F5F7FA', anchor='e'
+        ).grid(row=0, column=1, sticky='e', padx=(0, 4))
+
+        ctx = tk.Menu(self.root, tearoff=0)
+        ctx.add_command(label='삭제', command=self._delete_selected)
+        self.parsed_list.bind('<Button-3>', lambda e: ctx.tk_popup(e.x_root, e.y_root))
 
     # ── 탭 2: 위치 설정 ────────────────────────
     def _tab_calib(self, frame: ttk.Frame):
@@ -1331,10 +1353,8 @@ class App:
                 no_org += 1
                 warn_items.append(name)
             self.names_list.append({'org': org, 'name': name})
-            label = f'[{org}]  {name}' if org else f'  {name}  (소속없음)'
-            idx = self.parsed_list.size()
+            label = f'[{org}]  {name}' if org else f'{name}  (소속없음)'
             self.parsed_list.insert('end', label)
-            self.parsed_list.itemconfig(idx, {'bg': '#FFFFFF' if idx % 2 == 0 else '#F0F4FF'})
             ok += 1
 
         color = 'green' if ok > 0 else 'red'
