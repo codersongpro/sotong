@@ -679,7 +679,7 @@ class Config:
         'search_field_x': None, 'search_field_y': None,
         'result_first_x': None, 'result_first_y': None,
         'empty_pixel_rgb': None,
-        'search_delay': 1.0,
+        'search_delay': 0.5,
         'manual_confirm': False,
     }
 
@@ -767,9 +767,11 @@ _HELP_TEXT = """━━━━━━━━━━━━━━━━━━━━━�
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   1. 충북 소통메신저에 로그인합니다.
-  2. 메시지 보내기 화면에서 [사용자 선택] 버튼을 클릭합니다.
-  3. 사용자 선택 창이 열리면, 상단 탭에서 [전체조직]을 선택합니다.
-  4. 소통메신저 창과 이 프로그램 창을 화면에 나란히 배치하면 편리합니다.
+  2. 오른쪽 위의 편지 버튼(✉)을 클릭한 뒤,
+     '쪽지 작성' 또는 '대화하기' 메뉴를 선택합니다.
+  3. 메시지 보내기 화면에서 [사용자 선택] 버튼을 클릭합니다.
+  4. 사용자 선택 창이 열리면, 상단 탭에서 [전체조직]을 선택합니다.
+  5. 소통메신저 창과 이 프로그램 창을 화면에 나란히 배치하면 편리합니다.
 
   ※ 프로그램 실행 중에는 마우스를 움직이지 마세요.
      (긴급 중지: 마우스를 화면 왼쪽 위 모서리로 빠르게 이동)
@@ -1026,10 +1028,20 @@ class App:
             row=3, column=0, sticky='ew', padx=8, pady=2
         )
 
+        parse_status_row = tk.Frame(frame, bg='#F5F7FA')
+        parse_status_row.grid(row=4, column=0, sticky='ew', padx=8)
+        parse_status_row.columnconfigure(0, weight=1)
+
         self.parse_status = tk.Label(
-            frame, text='', fg='#666', font=('맑은 고딕', 9), anchor='w'
+            parse_status_row, text='', fg='#666', font=('맑은 고딕', 9), anchor='w'
         )
-        self.parse_status.grid(row=4, column=0, sticky='w', padx=10)
+        self.parse_status.grid(row=0, column=0, sticky='w')
+
+        tk.Label(
+            parse_status_row,
+            text='■ 빨간색 = 검색 결과 없음',
+            fg='#B71C1C', font=('맑은 고딕', 8), anchor='e'
+        ).grid(row=0, column=1, sticky='e', padx=(0, 4))
 
         list_frame = tk.Frame(frame)
         list_frame.grid(row=5, column=0, sticky='nsew', padx=8, pady=(2, 4))
@@ -1039,7 +1051,7 @@ class App:
 
         self.parsed_list = tk.Listbox(
             list_frame, font=('맑은 고딕', 9), selectmode='extended',
-            activestyle='none'
+            activestyle='none', selectbackground='#1565C0', selectforeground='white'
         )
         self.parsed_list.grid(row=0, column=0, sticky='nsew')
         sb = ttk.Scrollbar(list_frame, orient='vertical',
@@ -1054,9 +1066,11 @@ class App:
             lambda e: ctx.tk_popup(e.x_root, e.y_root)
         )
 
-        _btn(frame, '선택 항목 삭제', self._delete_selected, bg='#9E9E9E').grid(
-            row=6, column=0, sticky='w', padx=8, pady=(0, 6)
-        )
+        tk.Button(
+            frame, text='선택 항목 삭제', command=self._delete_selected,
+            bg='#9E9E9E', fg='white', activebackground='#9E9E9E',
+            relief='flat', font=('맑은 고딕', 9), padx=8, pady=4, cursor='hand2'
+        ).grid(row=6, column=0, sticky='w', padx=8, pady=(0, 6))
 
     # ── 탭 2: 위치 설정 ────────────────────────
     def _tab_calib(self, frame: ttk.Frame):
@@ -1126,7 +1140,7 @@ class App:
         tk.Label(setting_frame, text='검색 후 대기 시간(초):',
                  font=('맑은 고딕', 9)).grid(row=0, column=0, padx=8, pady=6, sticky='w')
 
-        self.delay_var = tk.DoubleVar(value=self.config.data.get('search_delay', 1.0))
+        self.delay_var = tk.DoubleVar(value=self.config.data.get('search_delay', 0.5))
         ttk.Spinbox(
             setting_frame, from_=0.3, to=5.0, increment=0.1,
             textvariable=self.delay_var, width=6,
@@ -1208,6 +1222,8 @@ class App:
             frame, height=14, state='disabled',
             font=('맑은 고딕', 9), wrap='none'
         )
+        self.log.tag_config('ok', foreground='#1B5E20')
+        self.log.tag_config('fail', foreground='#B71C1C')
         self.log.grid(row=2, column=0, sticky='nsew', padx=8, pady=4)
 
         prog_row = tk.Frame(frame, bg='#F5F7FA')
@@ -1315,8 +1331,10 @@ class App:
                 no_org += 1
                 warn_items.append(name)
             self.names_list.append({'org': org, 'name': name})
-            label = f'[{org}]  {name}' if org else f'>3  {name}  (소속없음)'
+            label = f'[{org}]  {name}' if org else f'  {name}  (소속없음)'
+            idx = self.parsed_list.size()
             self.parsed_list.insert('end', label)
+            self.parsed_list.itemconfig(idx, {'bg': '#FFFFFF' if idx % 2 == 0 else '#F0F4FF'})
             ok += 1
 
         color = 'green' if ok > 0 else 'red'
@@ -1475,11 +1493,12 @@ class App:
             self._log(f'{prefix}{search_str}  ... ')
             try:
                 self._do_search(search_str)
-                time.sleep(self.config.data.get('search_delay', 1.0))
+                time.sleep(self.config.data.get('search_delay', 0.5))
 
                 if not self._has_result():
                     fail += 1
                     self._log('✗  (검색 결과 없음)\n')
+                    self._mark_failed(idx)
                     self._update_progress(idx + 1, total)
                     continue
 
@@ -1501,6 +1520,7 @@ class App:
             except Exception as e:
                 fail += 1
                 self._log(f'✗  ({e})\n')
+                self._mark_failed(idx)
 
             self._update_progress(idx + 1, total)
             time.sleep(0.1)
@@ -1510,7 +1530,7 @@ class App:
     def _do_search(self, search_str: str):
         x = self.config.data['search_field_x']
         y = self.config.data['search_field_y']
-        delay = self.config.data.get('search_delay', 1.0) * 0.3
+        delay = self.config.data.get('search_delay', 0.5) * 0.3
         pyautogui.click(x, y)
         time.sleep(delay)
         pyautogui.hotkey('ctrl', 'a')
@@ -1524,6 +1544,8 @@ class App:
         y = self.config.data['result_first_y']
         time.sleep(0.2)
         pyautogui.doubleClick(x, y)
+        time.sleep(0.3)
+        pyautogui.press('enter')  # '선택된 사용자입니다' 팝업 닫기
 
     def _has_result(self) -> bool:
         """검색 결과 위치 픽셀 색상으로 결과 유무 판단. 미설정 시 항상 True."""
@@ -1553,7 +1575,10 @@ class App:
         self.continue_btn.config(state='disabled')
         sep = '─' * 44
         self._log(f'\n{sep}\n완료  ✓ {ok}명   ✗ {fail}명\n')
-        self.status_var.set(f'완료 — 성공: {ok}명, 실패: {fail}명')
+        if fail:
+            self.status_var.set(f'완료 — 성공: {ok}명, 실패: {fail}명  ← 빨간색 항목 확인')
+        else:
+            self.status_var.set(f'완료 — 성공: {ok}명')
 
     def _update_progress(self, idx: int, total: int):
         self.root.after(
@@ -1564,12 +1589,25 @@ class App:
             )
         )
 
+    def _mark_failed(self, idx: int):
+        self.root.after(
+            0,
+            lambda: self.parsed_list.itemconfig(
+                idx, {'bg': '#FFCDD2', 'fg': '#B71C1C'}
+            )
+        )
+
     def _log(self, msg: str):
         self.root.after(0, lambda: self._log_append(msg))
 
     def _log_append(self, msg: str):
         self.log.config(state='normal')
-        self.log.insert('end', msg)
+        if '✓' in msg:
+            self.log.insert('end', msg, 'ok')
+        elif '✗' in msg or '⚠' in msg:
+            self.log.insert('end', msg, 'fail')
+        else:
+            self.log.insert('end', msg)
         self.log.see('end')
         self.log.config(state='disabled')
 
