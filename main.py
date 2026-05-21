@@ -1526,13 +1526,21 @@ def lookup_org(s: str):
     keys = list(_ORG_LOOKUP.keys())
     prefix, suffix = _split_school_suffix(s)
     if suffix:
+        # Exact prefix+type match first
         for k, v in _ORG_LOOKUP.items():
             kpre, ksuf = _split_school_suffix(k)
             if kpre == prefix and ksuf == suffix:
                 return v
-    matches = difflib.get_close_matches(s, keys, n=1, cutoff=0.6)
-    if not matches and len(abbr) > 1:
-        matches = difflib.get_close_matches(abbr, keys, n=1, cutoff=0.6)
+        # Type-aware fuzzy: only match keys with same school type to prevent
+        # 초/중/고 names from resolving to 유치원 entries (e.g. 오송솔미초 → 오송솔미초병설유치원)
+        type_keys = [k for k in keys if _split_school_suffix(k)[1] == suffix]
+        matches = difflib.get_close_matches(s, type_keys, n=1, cutoff=0.75)
+        if not matches and len(abbr) > 1:
+            matches = difflib.get_close_matches(abbr, type_keys, n=1, cutoff=0.75)
+    else:
+        matches = difflib.get_close_matches(s, keys, n=1, cutoff=0.75)
+        if not matches and len(abbr) > 1:
+            matches = difflib.get_close_matches(abbr, keys, n=1, cutoff=0.75)
     if matches:
         return _ORG_LOOKUP[matches[0]]
     return None
@@ -1782,32 +1790,54 @@ class Config:
 # ─────────────────────────────────────────────
 
 class CaptureDialog(tk.Toplevel):
-    def __init__(self, parent, on_captured):
+    def __init__(self, parent, on_captured, label='위치'):
         super().__init__(parent)
         self.on_captured = on_captured
         self.title('위치 캡처')
-        self.geometry('420x220')
+        self.geometry('420x270')
         self.resizable(False, False)
         self.grab_set()
+
+        tk.Label(
+            self, text=f'📍  캡처 대상: {label}',
+            bg='#1565C0', fg='white', font=('맑은 고딕', 12, 'bold'), pady=12
+        ).pack(fill='x')
+
         tk.Label(
             self,
-            text='3초 카운트다운 후 마우스를 해당 위치로 이동하세요.',
-            bg='#555', fg='white', font=('맑은 고딕', 11), pady=18
-        ).pack(fill='x')
-        self.status = tk.Label(
-            self, text='📍 3초 카운트다운 후 캡처',
-            font=('맑은 고딕', 13, 'bold'), fg='#FF9800'
-        )
-        self.status.pack(pady=14)
-        tk.Button(self, text='취소', command=self.destroy).pack()
-        self._start()
+            text='[캡처 시작] 버튼을 클릭하면 이 창이 최소화됩니다.\n'
+                 '소통메신저에서 마우스를 해당 위치로 이동한 뒤\n'
+                 '5초 후 자동으로 위치가 캡처됩니다.',
+            font=('맑은 고딕', 10), justify='center', pady=12
+        ).pack()
 
-    def _start(self):
+        self.status = tk.Label(
+            self, text='아래 버튼을 클릭하여 캡처를 시작하세요.',
+            font=('맑은 고딕', 11, 'bold'), fg='#FF9800'
+        )
+        self.status.pack(pady=6)
+
+        btn_frame = tk.Frame(self)
+        btn_frame.pack(pady=10)
+        self.start_btn = tk.Button(
+            btn_frame, text='캡처 시작', command=self._begin,
+            bg='#FF9800', fg='white', font=('맑은 고딕', 11, 'bold'),
+            relief='flat', padx=16, pady=6, cursor='hand2'
+        )
+        self.start_btn.pack(side='left', padx=6)
+        tk.Button(
+            btn_frame, text='취소', command=self.destroy,
+            bg='#9E9E9E', fg='white', font=('맑은 고딕', 10),
+            relief='flat', padx=12, pady=6
+        ).pack(side='left', padx=6)
+
+    def _begin(self):
+        self.start_btn.config(state='disabled')
         threading.Thread(target=self._run, daemon=True).start()
 
     def _run(self):
-        self.iconify()
-        for i in range(3, 0, -1):
+        self.after(0, self.iconify)
+        for i in range(5, 0, -1):
             self.after(0, lambda i=i: self.status.config(text=f'{i}초 후 캡처...'))
             time.sleep(1)
         pos = pyautogui.position()
@@ -2153,13 +2183,16 @@ class App:
         ).grid(row=0, column=0, sticky='w')
 
         tk.Label(
-            bottom_frame, text='● 빨간색 항목 = 자동 선택 실패 (검색 결과 없음)',
-            fg='#B71C1C', font=('맑은 고딕', 8), bg='#F5F7FA', anchor='e'
+            bottom_frame,
+            text='더블클릭으로 수정  ·  ● 빨간색 = 자동 선택 실패',
+            fg='#555', font=('맑은 고딕', 8), bg='#F5F7FA', anchor='e'
         ).grid(row=0, column=1, sticky='e', padx=(0, 4))
 
         ctx = tk.Menu(self.root, tearoff=0)
+        ctx.add_command(label='수정', command=self._edit_item)
         ctx.add_command(label='삭제', command=self._delete_selected)
         self.parsed_list.bind('<Button-3>', lambda e: ctx.tk_popup(e.x_root, e.y_root))
+        self.parsed_list.bind('<Double-Button-1>', self._edit_item)
 
     # ── 탭 2: 위치 설정 ────────────────────────
     def _tab_calib(self, frame: ttk.Frame):
@@ -2387,8 +2420,8 @@ class App:
         ok = fail = no_org = 0
         warn_items = []
         for item in parsed:
-            org = item.get('org', '')
-            name = item.get('name', '')
+            org = item.get('org', '').replace(' ', '')
+            name = item.get('name', '').replace(' ', '')
             if not name:
                 fail += 1
                 continue
@@ -2429,6 +2462,57 @@ class App:
             text=f'명단 추출 완료: {total}명', fg='green'
         )
 
+    def _edit_item(self, event=None):
+        sel = self.parsed_list.curselection()
+        if not sel:
+            return
+        idx = sel[0]
+        item = self.names_list[idx]
+
+        dlg = tk.Toplevel(self.root)
+        dlg.title('항목 수정')
+        dlg.geometry('360x190')
+        dlg.resizable(False, False)
+        dlg.grab_set()
+        dlg.transient(self.root)
+
+        tk.Label(dlg, text='소속기관:', font=('맑은 고딕', 10)).grid(
+            row=0, column=0, padx=14, pady=(18, 6), sticky='e')
+        org_var = tk.StringVar(value=item.get('org', ''))
+        org_entry = tk.Entry(dlg, textvariable=org_var, font=('맑은 고딕', 10), width=22)
+        org_entry.grid(row=0, column=1, padx=8, pady=(18, 6), sticky='w')
+
+        tk.Label(dlg, text='이름:', font=('맑은 고딕', 10)).grid(
+            row=1, column=0, padx=14, pady=6, sticky='e')
+        name_var = tk.StringVar(value=item.get('name', ''))
+        tk.Entry(dlg, textvariable=name_var, font=('맑은 고딕', 10), width=22).grid(
+            row=1, column=1, padx=8, pady=6, sticky='w')
+
+        def apply():
+            new_org = org_var.get().strip().replace(' ', '')
+            new_name = name_var.get().strip().replace(' ', '')
+            if not new_name:
+                messagebox.showwarning('알림', '이름을 입력하세요.', parent=dlg)
+                return
+            self.names_list[idx] = {'org': new_org, 'name': new_name}
+            label = f'[{new_org}]  {new_name}' if new_org else f'{new_name}  (소속없음)'
+            self.parsed_list.delete(idx)
+            self.parsed_list.insert(idx, label)
+            dlg.destroy()
+
+        btn_frame = tk.Frame(dlg)
+        btn_frame.grid(row=2, column=0, columnspan=2, pady=14)
+        tk.Button(btn_frame, text='저장', command=apply,
+                  bg='#1565C0', fg='white', relief='flat',
+                  font=('맑은 고딕', 10), padx=14, pady=4).pack(side='left', padx=6)
+        tk.Button(btn_frame, text='취소', command=dlg.destroy,
+                  bg='#9E9E9E', fg='white', relief='flat',
+                  font=('맑은 고딕', 10), padx=14, pady=4).pack(side='left', padx=6)
+
+        dlg.bind('<Return>', lambda e: apply())
+        dlg.bind('<Escape>', lambda e: dlg.destroy())
+        org_entry.focus_set()
+
     # ── 위치 캡처 ──────────────────────────────
     def _do_capture(self, key: str):
         if pyautogui is None:
@@ -2440,7 +2524,8 @@ class App:
             self.config.data[key + '_y'] = y
             self._refresh_calib_labels()
 
-        CaptureDialog(self.root, on_captured)
+        labels = {'search_field': '검색 입력창', 'result_first': '결과 첫 번째 행'}
+        CaptureDialog(self.root, on_captured, label=labels.get(key, key))
 
     def _save_calib(self):
         self.config.data['search_delay'] = round(self.delay_var.get(), 1)
@@ -2572,7 +2657,9 @@ class App:
         x = self.config.data['result_first_x']
         y = self.config.data['result_first_y']
         time.sleep(0.2)
-        pyautogui.doubleClick(x, y)
+        pyautogui.click(x, y)
+        time.sleep(0.1)
+        pyautogui.click(x, y)
         time.sleep(0.4)
         if self._popup_appeared():
             pyautogui.press('enter')
