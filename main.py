@@ -2444,6 +2444,8 @@ class App:
             self.names_list.append({'org': org, 'name': name})
             label = f'[{org}]  {name}' if org else f'{name}  (소속없음)'
             self.parsed_list.insert('end', label)
+            if not org:
+                self.parsed_list.itemconfig('end', {'bg': '#E0E0E0', 'fg': '#757575'})
             ok += 1
 
         color = 'green' if ok > 0 else 'red'
