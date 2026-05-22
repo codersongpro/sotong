@@ -716,6 +716,8 @@ _ORG_LOOKUP: dict = dict((
     ("소태초", "소태초등학교"),
     ("속리초등학교", "속리초등학교"),
     ("속리초", "속리초등학교"),
+    ("솔강초등학교", "솔강초등학교"),
+    ("솔강초", "솔강초등학교"),
     ("솔밭초등학교", "솔밭초등학교"),
     ("솔밭초", "솔밭초등학교"),
     ("송면초등학교", "송면초등학교"),
@@ -2442,6 +2444,8 @@ class App:
             self.names_list.append({'org': org, 'name': name})
             label = f'[{org}]  {name}' if org else f'{name}  (소속없음)'
             self.parsed_list.insert('end', label)
+            if not org:
+                self.parsed_list.itemconfig('end', {'bg': '#E0E0E0', 'fg': '#757575'})
             ok += 1
 
         color = 'green' if ok > 0 else 'red'
@@ -2618,7 +2622,7 @@ class App:
 
                 if not self._has_result():
                     fail += 1
-                    self._log('✗  (검색 결과 없음)\n')
+                    self._log('—  (사용자 없음)\n')
                     self._mark_failed(idx)
                     self._update_progress(idx + 1, total)
                     continue
@@ -2674,29 +2678,48 @@ class App:
         ax = self.config.data['add_button_x']
         ay = self.config.data['add_button_y']
         time.sleep(0.2)
-        pyautogui.click(rx, ry)   # 2단계: 결과 첫 번째 클릭 (선택)
+        pyautogui.click(rx, ry)
         time.sleep(0.15)
-        pyautogui.click(ax, ay)   # 3단계: 사용자 선택 버튼 클릭
+        before = self._snapshot_dialogs()
+        pyautogui.click(ax, ay)
         time.sleep(0.4)
-        if self._popup_appeared():
+        new_hwnds = self._snapshot_dialogs() - before
+        if new_hwnds and self._is_duplicate_popup(new_hwnds):
             pyautogui.press('enter')
             time.sleep(0.15)
             return 'duplicate'
         return 'ok'
 
-    def _popup_appeared(self) -> bool:
-        """win32gui로 모달 다이얼로그 출현 감지."""
+    def _snapshot_dialogs(self) -> set:
+        """현재 열려있는 #32770 다이얼로그 핸들 집합 반환."""
         try:
             import win32gui
-            found = []
+            found = set()
             def cb(hwnd, _):
                 if win32gui.IsWindowVisible(hwnd) and win32gui.IsWindowEnabled(hwnd):
                     if win32gui.GetClassName(hwnd) == '#32770':
-                        found.append(hwnd)
+                        found.add(hwnd)
             win32gui.EnumWindows(cb, None)
-            return bool(found)
+            return found
         except Exception:
-            return False
+            return set()
+
+    def _is_duplicate_popup(self, hwnds: set) -> bool:
+        """새 다이얼로그의 텍스트에 '이미'가 포함되면 중복 팝업으로 판정."""
+        try:
+            import win32gui
+            for hwnd in hwnds:
+                texts = [win32gui.GetWindowText(hwnd)]
+                def collect(h, _):
+                    t = win32gui.GetWindowText(h)
+                    if t:
+                        texts.append(t)
+                win32gui.EnumChildWindows(hwnd, collect, None)
+                if any('이미' in t for t in texts):
+                    return True
+        except Exception:
+            pass
+        return False
 
     def _has_result(self) -> bool:
         """검색 결과 첫 항목 위치의 픽셀 밝기로 결과 유무 자동 판단."""
