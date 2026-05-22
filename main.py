@@ -1762,6 +1762,7 @@ class Config:
     DEFAULTS = {
         'search_field_x': None, 'search_field_y': None,
         'result_first_x': None, 'result_first_y': None,
+        'add_button_x':   None, 'add_button_y':   None,
         'empty_pixel_rgb': None,
         'search_delay': 0.5,
         'manual_confirm': False,
@@ -1785,7 +1786,8 @@ class Config:
 
     def is_calibrated(self):
         return (self.data.get('search_field_x') is not None and
-                self.data.get('result_first_x') is not None)
+                self.data.get('result_first_x') is not None and
+                self.data.get('add_button_x')   is not None)
 
 
 # ─────────────────────────────────────────────
@@ -1810,7 +1812,7 @@ class CaptureDialog(tk.Toplevel):
             self,
             text='[캡처 시작] 버튼을 클릭하면 이 창이 최소화됩니다.\n'
                  '소통메신저에서 마우스를 해당 위치로 이동한 뒤\n'
-                 '5초 후 자동으로 위치가 캡처됩니다.',
+                 '3초 후 자동으로 위치가 캡처됩니다.',
             font=('맑은 고딕', 10), justify='center', pady=12
         ).pack()
 
@@ -1913,24 +1915,31 @@ _HELP_TEXT = f"""━━━━━━━━━━━━━━━━━━━━━
   소통메신저의 어느 위치를 클릭해야 하는지 알려주는 과정입니다.
   처음 한 번만 설정하면 이후로는 자동으로 기억합니다.
 
+  자동 선택은 3단계로 동작합니다.
+    1단계: 검색 입력창에 이름 검색
+    2단계: 검색 결과 첫 번째 항목 클릭 (선택)
+    3단계: 사용자 선택 버튼 클릭 (추가)
+
   [ STEP 1 ]  검색 입력창 위치
-    ① [📍 위치 설정] 버튼을 클릭합니다.
-    ② [캡처 시작] 버튼을 클릭하면 창이 최소화됩니다.
-    ③ 3초 안에 소통메신저 검색 입력칸 위에 마우스를 올려두세요.
-    ④ 자동으로 좌표가 저장됩니다.
+    ① [📍 위치 설정] 버튼 클릭 → [캡처 시작] 클릭
+    ② 3초 안에 소통메신저 검색 입력칸 위에 마우스를 올리세요.
 
   [ STEP 2 ]  검색 결과 첫 번째 항목 위치
     ① 소통메신저 검색창에 임의 이름(예: 홍길동)을 검색합니다.
     ② 결과 목록의 첫 번째 줄이 보이는 상태에서
-       [📍 위치 설정] 버튼을 클릭합니다.
-    ③ [캡처 시작] 클릭 후 3초 안에
-       결과 목록의 첫 번째 항목 위에 마우스를 올리세요.
-    ④ 자동 선택 시 해당 위치를 더블클릭하여 사용자를 추가합니다.
+       [📍 위치 설정] → [캡처 시작] 클릭
+    ③ 3초 안에 결과 목록의 첫 번째 항목 위에 마우스를 올리세요.
+
+  [ STEP 3 ]  사용자 선택 버튼 위치
+    ① 결과 목록이 보이는 상태에서
+       [📍 위치 설정] → [캡처 시작] 클릭
+    ② 3초 안에 소통메신저의 [사용자 선택] 또는 [추가] 버튼 위에
+       마우스를 올리세요.
 
   [ 검색 설정 ]
-    · 검색 후 대기 시간: 인터넷이 느리면 1.5~2.0초로 높이세요.
+    · 검색 후 대기 시간: 기본 0.5초, 느리면 1.5~2.0초로 높이세요.
     · 수동 확인 모드: 동명이인이 많을 때 체크합니다.
-      (검색 후 소통메신저에서 직접 더블클릭 → [▶▶ 계속] 클릭)
+      (검색 후 소통메신저에서 직접 선택 → [▶▶ 계속] 클릭)
 
   ★ 반드시 [✅ 설정 저장] 버튼을 눌러 저장하세요!
 
@@ -2194,14 +2203,15 @@ class App:
             fg='#555', font=('맑은 고딕', 9), justify='center'
         ).grid(row=0, column=0, sticky='ew', padx=10, pady=(10, 6))
 
-        # STEP 1·2: 위치 설정
-        pos_frame = ttk.LabelFrame(frame, text='STEP 1 · 2 — 검색창 및 결과 위치 설정')
+        # STEP 1·2·3: 위치 설정
+        pos_frame = ttk.LabelFrame(frame, text='STEP 1 · 2 · 3 — 위치 설정 (순서대로)')
         pos_frame.grid(row=1, column=0, sticky='ew', padx=10, pady=4)
         pos_frame.columnconfigure(1, weight=1)
 
         for row_i, (label_text, key) in enumerate([
             ('STEP 1  검색 입력창:', 'search_field'),
             ('STEP 2  결과 첫 번째:', 'result_first'),
+            ('STEP 3  사용자 선택 버튼:', 'add_button'),
         ]):
             tk.Label(pos_frame, text=label_text,
                      font=('맑은 고딕', 9, 'bold')).grid(
@@ -2513,7 +2523,11 @@ class App:
             self.config.data[key + '_y'] = y
             self._refresh_calib_labels()
 
-        labels = {'search_field': '검색 입력창', 'result_first': '결과 첫 번째 행'}
+        labels = {
+            'search_field': '검색 입력창',
+            'result_first': '결과 첫 번째 행',
+            'add_button':   '사용자 선택 버튼',
+        }
         CaptureDialog(self.root, on_captured, label=labels.get(key, key))
 
     def _save_calib(self):
@@ -2524,7 +2538,7 @@ class App:
         self.root.after(2000, lambda: self.calib_msg.config(text=''))
 
     def _refresh_calib_labels(self):
-        for key in ('search_field', 'result_first'):
+        for key in ('search_field', 'result_first', 'add_button'):
             x = self.config.data.get(key + '_x')
             y = self.config.data.get(key + '_y')
             lbl = getattr(self, f'lbl_{key}', None)
@@ -2544,7 +2558,7 @@ class App:
             return
         if not self.config.is_calibrated():
             messagebox.showwarning(
-                '알림', '위치 설정 탭에서 검색창·결과 위치를 먼저 설정하세요.'
+                '알림', '위치 설정 탭에서 검색창·결과·선택 버튼 위치를 모두 설정하세요.'
             )
             return
         self.stop_flag.clear()
@@ -2642,13 +2656,15 @@ class App:
         pyautogui.press('enter')
 
     def _do_select(self) -> str:
-        """더블클릭(결과 첫 번째) 후 팝업 여부로 결과 반환: 'ok' | 'duplicate'"""
-        x = self.config.data['result_first_x']
-        y = self.config.data['result_first_y']
+        """3단계: 결과 클릭 → 선택 버튼 클릭 → 팝업 감지"""
+        rx = self.config.data['result_first_x']
+        ry = self.config.data['result_first_y']
+        ax = self.config.data['add_button_x']
+        ay = self.config.data['add_button_y']
         time.sleep(0.2)
-        pyautogui.click(x, y)
-        time.sleep(0.1)
-        pyautogui.click(x, y)
+        pyautogui.click(rx, ry)   # 2단계: 결과 첫 번째 클릭 (선택)
+        time.sleep(0.15)
+        pyautogui.click(ax, ay)   # 3단계: 사용자 선택 버튼 클릭
         time.sleep(0.4)
         if self._popup_appeared():
             pyautogui.press('enter')
