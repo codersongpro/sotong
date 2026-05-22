@@ -13,6 +13,7 @@ import re
 import subprocess
 import sys
 import difflib
+import webbrowser
 
 try:
     import pyautogui
@@ -2345,12 +2346,21 @@ class App:
     # ── 탭 4: 사용 방법 ────────────────────────
     def _tab_help(self, frame: ttk.Frame):
         frame.columnconfigure(0, weight=1)
-        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(1, weight=1)
+
+        tk.Button(
+            frame,
+            text='▶  영상으로 사용 방법 보기 (YouTube)',
+            bg='#FF0000', fg='white', activebackground='#CC0000',
+            relief='flat', font=('맑은 고딕', 10, 'bold'), padx=10, pady=6,
+            cursor='hand2',
+            command=lambda: webbrowser.open('https://youtu.be/shZnB5NRN5g')
+        ).grid(row=0, column=0, pady=(10, 4))
 
         txt = scrolledtext.ScrolledText(
             frame, font=('맑은 고딕', 10), wrap='word', state='normal'
         )
-        txt.grid(row=0, column=0, sticky='nsew', padx=4, pady=4)
+        txt.grid(row=1, column=0, sticky='nsew', padx=4, pady=4)
         txt.insert('1.0', _HELP_TEXT)
         txt.config(state='disabled')
 
