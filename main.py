@@ -2102,16 +2102,17 @@ class App:
 
         tk.Label(
             guide,
-            text='📋  명단 붙여넣기 형식 안내',
+            text='📋  명단을 입력하는 방법 (두 가지 중 하나 선택)',
             bg='#E3F2FD', fg='#0D47A1', font=('맑은 고딕', 9, 'bold'), anchor='w'
         ).grid(row=0, column=0, sticky='w', padx=10, pady=(6, 2))
 
         tk.Label(
             guide,
-            text='엑셀에서 소속기관(A열)과 이름(B열)을 함께 선택한 뒤 복사(Ctrl+C)하고 아래에 붙여넣기 하세요.\n'
-                 '예)  충주중학교    홍길동\n'
-                 '     청주고등학교  김철수\n'
-                 '소속기관이 없는 경우 이름만 입력해도 됩니다. 엑셀·HWP 파일을 직접 열어도 됩니다.',
+            text='방법 ①  복사·붙여넣기 — 엑셀·HWP에서 소속기관·이름 범위를 선택 후 복사(Ctrl+C),\n'
+                 '                              아래 입력창에 붙여넣기(Ctrl+V) → [명단 추출 →] 클릭\n'
+                 '방법 ②  파일 직접 열기  — 아래 [엑셀 파일 열기] 또는 [HWP 파일 열기] 버튼 클릭\n'
+                 '\n'
+                 '형식 예)  충주중학교    홍길동        (소속기관  이름  순서)',
             bg='#E3F2FD', fg='#333', font=('맑은 고딕', 9), justify='left', anchor='w'
         ).grid(row=1, column=0, sticky='w', padx=10, pady=(0, 8))
 
@@ -2141,7 +2142,7 @@ class App:
 
         for text, cmd, bg in [
             ('명단 추출 →', self._parse,       '#1565C0'),
-            ('초기화',       self._clear_input, '#9E9E9E'),
+            ('초기화',       self._clear_input, '#E53935'),
         ]:
             tk.Button(
                 action_frame, text=text, command=cmd,
@@ -2177,8 +2178,8 @@ class App:
         bottom_frame.columnconfigure(1, weight=1)
 
         tk.Button(
-            bottom_frame, text='선택 항목 삭제', command=self._delete_selected,
-            bg='#9E9E9E', fg='white', activebackground='#9E9E9E',
+            bottom_frame, text='선택 항목 삭제 (Del)', command=self._delete_selected,
+            bg='#EF6C00', fg='white', activebackground='#E65100',
             relief='flat', font=('맑은 고딕', 9), padx=8, pady=3, cursor='hand2'
         ).grid(row=0, column=0, sticky='w')
 
@@ -2193,6 +2194,7 @@ class App:
         ctx.add_command(label='삭제', command=self._delete_selected)
         self.parsed_list.bind('<Button-3>', lambda e: ctx.tk_popup(e.x_root, e.y_root))
         self.parsed_list.bind('<Double-Button-1>', self._edit_item)
+        self.parsed_list.bind('<Delete>', lambda e: self._delete_selected())
 
     # ── 탭 2: 위치 설정 ────────────────────────
     def _tab_calib(self, frame: ttk.Frame):
