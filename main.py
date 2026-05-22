@@ -2618,7 +2618,7 @@ class App:
 
                 if not self._has_result():
                     fail += 1
-                    self._log('✗  (검색 결과 없음)\n')
+                    self._log('—  (사용자 없음)\n')
                     self._mark_failed(idx)
                     self._update_progress(idx + 1, total)
                     continue
@@ -2674,29 +2674,30 @@ class App:
         ax = self.config.data['add_button_x']
         ay = self.config.data['add_button_y']
         time.sleep(0.2)
-        pyautogui.click(rx, ry)   # 2단계: 결과 첫 번째 클릭 (선택)
+        pyautogui.click(rx, ry)
         time.sleep(0.15)
-        pyautogui.click(ax, ay)   # 3단계: 사용자 선택 버튼 클릭
+        before = self._snapshot_dialogs()   # 선택 버튼 클릭 직전 스냅샷
+        pyautogui.click(ax, ay)
         time.sleep(0.4)
-        if self._popup_appeared():
+        if self._snapshot_dialogs() - before:   # 새 팝업이 생겼으면 중복
             pyautogui.press('enter')
             time.sleep(0.15)
             return 'duplicate'
         return 'ok'
 
-    def _popup_appeared(self) -> bool:
-        """win32gui로 모달 다이얼로그 출현 감지."""
+    def _snapshot_dialogs(self) -> set:
+        """현재 열려있는 #32770 다이얼로그 핸들 집합 반환."""
         try:
             import win32gui
-            found = []
+            found = set()
             def cb(hwnd, _):
                 if win32gui.IsWindowVisible(hwnd) and win32gui.IsWindowEnabled(hwnd):
                     if win32gui.GetClassName(hwnd) == '#32770':
-                        found.append(hwnd)
+                        found.add(hwnd)
             win32gui.EnumWindows(cb, None)
-            return bool(found)
+            return found
         except Exception:
-            return False
+            return set()
 
     def _has_result(self) -> bool:
         """검색 결과 첫 항목 위치의 픽셀 밝기로 결과 유무 자동 판단."""
