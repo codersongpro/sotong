@@ -2678,10 +2678,11 @@ class App:
         time.sleep(0.2)
         pyautogui.click(rx, ry)
         time.sleep(0.15)
-        before = self._snapshot_dialogs()   # 선택 버튼 클릭 직전 스냅샷
+        before = self._snapshot_dialogs()
         pyautogui.click(ax, ay)
         time.sleep(0.4)
-        if self._snapshot_dialogs() - before:   # 새 팝업이 생겼으면 중복
+        new_hwnds = self._snapshot_dialogs() - before
+        if new_hwnds and self._is_duplicate_popup(new_hwnds):
             pyautogui.press('enter')
             time.sleep(0.15)
             return 'duplicate'
@@ -2700,6 +2701,23 @@ class App:
             return found
         except Exception:
             return set()
+
+    def _is_duplicate_popup(self, hwnds: set) -> bool:
+        """새 다이얼로그의 텍스트에 '이미'가 포함되면 중복 팝업으로 판정."""
+        try:
+            import win32gui
+            for hwnd in hwnds:
+                texts = [win32gui.GetWindowText(hwnd)]
+                def collect(h, _):
+                    t = win32gui.GetWindowText(h)
+                    if t:
+                        texts.append(t)
+                win32gui.EnumChildWindows(hwnd, collect, None)
+                if any('이미' in t for t in texts):
+                    return True
+        except Exception:
+            pass
+        return False
 
     def _has_result(self) -> bool:
         """검색 결과 첫 항목 위치의 픽셀 밝기로 결과 유무 자동 판단."""
