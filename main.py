@@ -2422,13 +2422,20 @@ class App:
         self.parsed_list.delete(0, 'end')
 
         ok = fail = no_org = 0
-        warn_items = []
+        valid = []
         for item in parsed:
             org = item.get('org', '').replace(' ', '')
             name = item.get('name', '').replace(' ', '')
             if not name:
                 fail += 1
                 continue
+            valid.append({'org': org, 'name': name})
+
+        valid.sort(key=lambda x: x['name'])
+
+        warn_items = []
+        for entry in valid:
+            org, name = entry['org'], entry['name']
             if not org:
                 no_org += 1
                 warn_items.append(name)
