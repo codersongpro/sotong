@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='소통픽',
+    name='sotongpick',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

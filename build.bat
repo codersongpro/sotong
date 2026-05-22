@@ -100,7 +100,7 @@ if errorlevel 1 (
 
 rem ---- Build EXE ----
 echo Building exe...
-"%PYTHON%" -m PyInstaller --onefile --windowed --name "소통픽" --hidden-import pyperclip --hidden-import openpyxl --hidden-import PIL "%SCRIPT%"
+"%PYTHON%" -m PyInstaller --onefile --windowed --name "sotongpick" --hidden-import pyperclip --hidden-import openpyxl --hidden-import PIL "%SCRIPT%"
 
 if errorlevel 1 (
     echo Build failed.
@@ -109,6 +109,6 @@ if errorlevel 1 (
 )
 
 echo.
-echo Build complete: dist\소통픽.exe
+echo Build complete: dist\sotongpick.exe
 echo.
 pause
