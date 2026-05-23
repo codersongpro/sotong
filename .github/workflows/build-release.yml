@@ -1,0 +1,66 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --disable-pip-version-check `
+            pyautogui pyperclip openpyxl pywin32 pillow pyinstaller
+        shell: pwsh
+
+      - name: Build EXE
+        run: |
+          python -m PyInstaller --onefile --windowed --name "sotongpick" `
+            --hidden-import pyperclip `
+            --hidden-import openpyxl `
+            --hidden-import PIL `
+            main.py
+        shell: pwsh
+
+      - name: Get version from main.py
+        id: ver
+        run: |
+          $ver = python -c "import re; c=open('main.py',encoding='utf-8').read(); m=re.search(r""APP_VERSION\s*=\s*'([^']+)'"", c); print(m.group(1) if m else 'unknown')"
+          echo "version=$ver" >> $env:GITHUB_OUTPUT
+        shell: pwsh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sotongpick-v${{ steps.ver.outputs.version }}
+          path: dist/sotongpick.exe
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ github.ref_name }} dist/sotongpick.exe `
+            --title "소통픽 ${{ github.ref_name }}" `
+            --notes "## 소통픽 ${{ github.ref_name }}
+
+          ### 설치 방법
+          1. 아래 **sotongpick.exe** 다운로드
+          2. 더블클릭으로 바로 실행 (설치 불필요)
+          3. Windows 보안 경고 시: **추가 정보** → **실행** 클릭"
+        shell: pwsh
