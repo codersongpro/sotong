@@ -30,7 +30,7 @@ jobs:
 
       - name: Build EXE
         run: |
-          python -m PyInstaller --onefile --windowed --name "sotongpick" `
+          python -m PyInstaller --onefile --windowed --name "edunote" `
             --hidden-import pyperclip `
             --hidden-import openpyxl `
             --hidden-import PIL `
@@ -47,20 +47,20 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sotongpick-v${{ steps.ver.outputs.version }}
-          path: dist/sotongpick.exe
+          name: edunote-v${{ steps.ver.outputs.version }}
+          path: dist/edunote.exe
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create ${{ github.ref_name }} dist/sotongpick.exe `
-            --title "소통픽 ${{ github.ref_name }}" `
-            --notes "## 소통픽 ${{ github.ref_name }}
+          gh release create ${{ github.ref_name }} dist/edunote.exe `
+            --title "Edunote ${{ github.ref_name }}" `
+            --notes "## Edunote ${{ github.ref_name }}
 
           ### 설치 방법
-          1. 아래 **sotongpick.exe** 다운로드
+          1. 아래 **edunote.exe** 다운로드
           2. 더블클릭으로 바로 실행 (설치 불필요)
           3. Windows 보안 경고 시: **추가 정보** → **실행** 클릭"
         shell: pwsh

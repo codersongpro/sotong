@@ -1,7 +1,8 @@
-"""소통픽 — 충북 소통메신저 자동 사용자 선택"""
+"""Edunote — 학생 기록부터 교무 행정까지, 교직원을 위한 AI 도우미"""
 
-APP_NAME    = '소통픽'
-APP_VERSION = '1.5'
+APP_NAME    = 'Edunote'
+APP_VERSION = '1.0.0'
+GITHUB_REPO = 'codersongpro/sotong'
 
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, filedialog
@@ -2034,6 +2035,7 @@ class App:
         self._build_ui()
         self._refresh_calib_labels()
         self._check_deps()
+        threading.Thread(target=self._check_update, daemon=True).start()
 
     # ── 테마 (충북교육청 블루) ─────────────────
     def _apply_theme(self):
@@ -2062,9 +2064,9 @@ class App:
         # 개발자 정보 바 (항상 상단 표시)
         dev_bar = tk.Label(
             self.root,
-            text=f'  {APP_NAME} v{APP_VERSION}  |  Developed by 송동석'
-                 '  |  Teacher · Data Analytics · App Developer'
-                 '  |  협업: dungst.me@gmail.com  ',
+            text=f'  {APP_NAME} v{APP_VERSION}'
+                 '  |  학생 기록부터 교무 행정까지, 교직원을 위한 AI 도우미'
+                 '  |  Developed by 송동석  |  dungst.me@gmail.com  ',
             bg='#1565C0', fg='white',
             font=('맑은 고딕', 9), anchor='w', pady=5
         )
@@ -2377,6 +2379,40 @@ class App:
                 f'필수 패키지 미설치: {", ".join(missing)}\n\n'
                 '시작.bat 을 실행하면 자동으로 설치됩니다.'
             )
+
+    # ── 자동 업데이트 확인 ─────────────────────
+    def _check_update(self):
+        try:
+            import urllib.request
+            import json as _json
+            url = f'https://api.github.com/repos/{GITHUB_REPO}/releases/latest'
+            req = urllib.request.Request(url, headers={'User-Agent': 'edunote-app'})
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = _json.loads(resp.read())
+            tag = data.get('tag_name', '').lstrip('v')
+            html_url = data.get('html_url', '')
+            if tag and self._is_newer(tag, APP_VERSION):
+                self.root.after(0, lambda: self._show_update_banner(tag, html_url))
+        except Exception:
+            pass
+
+    def _is_newer(self, latest: str, current: str) -> bool:
+        try:
+            def ver(v): return tuple(int(x) for x in v.split('.'))
+            return ver(latest) > ver(current)
+        except Exception:
+            return False
+
+    def _show_update_banner(self, latest: str, url: str):
+        banner = tk.Label(
+            self.root,
+            text=f'  🔔  새 버전 v{latest} 이 출시되었습니다  —  클릭하여 업데이트  ',
+            bg='#E65100', fg='white',
+            font=('맑은 고딕', 9, 'bold'), anchor='w', pady=5,
+            cursor='hand2'
+        )
+        banner.grid(row=2, column=0, sticky='ew')
+        banner.bind('<Button-1>', lambda e: webbrowser.open(url))
 
     # ── 엑셀 열기 ──────────────────────────────
     def _open_excel(self):
