@@ -1,7 +1,7 @@
-"""Edunote — 학생 기록부터 교무 행정까지, 교직원을 위한 AI 도우미"""
+"""소통픽 — 충북 소통메신저 자동 사용자 선택"""
 
-APP_NAME    = 'Edunote'
-APP_VERSION = '1.0.0'
+APP_NAME    = '소통픽'
+APP_VERSION = '1.5'
 GITHUB_REPO = 'codersongpro/sotong'
 
 import tkinter as tk
@@ -2064,9 +2064,9 @@ class App:
         # 개발자 정보 바 (항상 상단 표시)
         dev_bar = tk.Label(
             self.root,
-            text=f'  {APP_NAME} v{APP_VERSION}'
-                 '  |  학생 기록부터 교무 행정까지, 교직원을 위한 AI 도우미'
-                 '  |  Developed by 송동석  |  dungst.me@gmail.com  ',
+            text=f'  {APP_NAME} v{APP_VERSION}  |  Developed by 송동석'
+                 '  |  Teacher · Data Analytics · App Developer'
+                 '  |  협업: dungst.me@gmail.com  ',
             bg='#1565C0', fg='white',
             font=('맑은 고딕', 9), anchor='w', pady=5
         )
