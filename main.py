@@ -1,7 +1,7 @@
 """소통픽 — 충북 소통메신저 자동 사용자 선택"""
 
 APP_NAME    = '소통픽'
-APP_VERSION = '1.5'
+APP_VERSION = '1.6'
 
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, filedialog
@@ -2639,7 +2639,7 @@ class App:
 
                 if manual:
                     self.continue_event.clear()
-                    self.root.after(0, self._show_continue)
+                    self.root.after(0, lambda n=name: self._show_continue(n))
                     self.continue_event.wait()
                     if self.stop_flag.is_set():
                         break
@@ -2744,8 +2744,8 @@ class App:
         except Exception:
             return True
 
-    def _show_continue(self):
-        name = self.names_list[0].get('name', '') if self.names_list else ''
+    def _show_continue(self, name: str):
+        name = name or ''
         self.status_var.set(
             f'수동 선택 대기: {name}  →  소통메신저에서 결과 클릭 → 선택 버튼 클릭 후 [계속] 버튼'
         )
