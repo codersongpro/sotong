@@ -14,6 +14,7 @@ import subprocess
 import sys
 import difflib
 import webbrowser
+import urllib.request
 
 try:
     import pyautogui
@@ -36,6 +37,7 @@ except ImportError:
 #  설정 파일 경로
 # ─────────────────────────────────────────────
 CONFIG_FILE = os.path.join(os.path.expanduser("~"), ".chungbuk_auto_config.json")
+LATEST_RELEASE_API = 'https://api.github.com/repos/codersongpro/sotong/releases/latest'
 
 # ─────────────────────────────────────────────
 #  정규식
@@ -2017,6 +2019,24 @@ _HELP_TEXT = f"""━━━━━━━━━━━━━━━━━━━━━
 #  App
 # ─────────────────────────────────────────────
 
+
+def _version_parts(version: str) -> tuple:
+    version = (version or '').strip().lstrip('vV')
+    parts = []
+    for part in version.split('.'):
+        digits = ''.join(ch for ch in part if ch.isdigit())
+        parts.append(int(digits) if digits else 0)
+    return tuple(parts or [0])
+
+
+def _is_newer_version(latest: str, current: str) -> bool:
+    latest_parts = _version_parts(latest)
+    current_parts = _version_parts(current)
+    size = max(len(latest_parts), len(current_parts))
+    latest_parts += (0,) * (size - len(latest_parts))
+    current_parts += (0,) * (size - len(current_parts))
+    return latest_parts > current_parts
+
 class App:
     def __init__(self, root: tk.Tk):
         self.root = root
@@ -2034,6 +2054,7 @@ class App:
         self._build_ui()
         self._refresh_calib_labels()
         self._check_deps()
+        self._check_for_update_async()
 
     # ── 테마 (충북교육청 블루) ─────────────────
     def _apply_theme(self):
@@ -2365,6 +2386,37 @@ class App:
         txt.config(state='disabled')
 
     # ── 의존성 확인 ────────────────────────────
+
+    # update check
+    def _check_for_update_async(self):
+        threading.Thread(target=self._check_for_update_worker, daemon=True).start()
+
+    def _check_for_update_worker(self):
+        try:
+            req = urllib.request.Request(
+                LATEST_RELEASE_API,
+                headers={'User-Agent': f'{APP_NAME}/{APP_VERSION}'}
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+            latest = (data.get('tag_name') or data.get('name') or '').strip().lstrip('vV')
+            url = data.get('html_url') or 'https://github.com/codersongpro/sotong/releases/latest'
+            if latest and _is_newer_version(latest, APP_VERSION):
+                self.root.after(0, lambda: self._show_update_notice(latest, url))
+        except Exception:
+            pass
+
+    def _show_update_notice(self, latest: str, url: str):
+        open_page = messagebox.askyesno(
+            '새 버전 알림',
+            f'{APP_NAME} 새 버전이 나왔습니다.\n\n'
+            f'현재 버전: {APP_VERSION}\n'
+            f'최신 버전: {latest}\n\n'
+            '다운로드 페이지를 열까요?'
+        )
+        if open_page:
+            webbrowser.open(url)
+
     def _check_deps(self):
         missing = []
         if pyautogui is None:
