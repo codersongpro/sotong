@@ -63,7 +63,7 @@
       font-size: 15px;
       font-weight: 600;
       color: var(--ink);
-      letter-spacing: -0.02em;
+      letter-spacing: 0;
     }
     .nav-wordmark span { color: var(--primary); }
     .btn-primary {
@@ -113,17 +113,17 @@
 
     /* ── Display typography (weight stays 400) ── */
     .display-hero {
-      font-size: clamp(40px, 7vw, 72px);
+      font-size: 64px;
       font-weight: 400;
       line-height: 1.1;
-      letter-spacing: -2.16px;
+      letter-spacing: 0;
       color: var(--ink);
     }
     .display-lg {
-      font-size: clamp(26px, 4vw, 36px);
+      font-size: 34px;
       font-weight: 400;
       line-height: 1.2;
-      letter-spacing: -0.72px;
+      letter-spacing: 0;
       color: var(--ink);
       margin-bottom: 12px;
     }
@@ -132,6 +132,12 @@
     .hero {
       padding: 96px 0 80px;
       border-bottom: 1px solid var(--hairline);
+    }
+    .hero-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+      gap: 48px;
+      align-items: center;
     }
     .hero-inner { max-width: 680px; }
     .hero-sub {
@@ -160,6 +166,80 @@
     .btn-text:hover { color: var(--ink); }
     .hero-meta { margin-top: 20px; font-size: 13px; color: var(--muted-soft); }
 
+    .app-preview {
+      background: var(--surface-card);
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 18px 50px rgba(38, 37, 30, 0.10);
+    }
+    .preview-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1565C0;
+      color: #fff;
+      font-size: 12px;
+      padding: 8px 12px;
+    }
+    .preview-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: #E8EAF6;
+      border-bottom: 1px solid var(--hairline);
+      font-size: 12px;
+      color: #37474F;
+    }
+    .preview-tabs span {
+      padding: 9px 10px;
+      text-align: center;
+      border-right: 1px solid #D2D6EF;
+    }
+    .preview-tabs span:first-child { background: #1565C0; color: #fff; }
+    .preview-body {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      background: #F5F7FA;
+    }
+    .preview-check {
+      background: #E3F2FD;
+      border: 1px solid #BBDEFB;
+      color: #0D47A1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .preview-table {
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+      font-size: 13px;
+    }
+    .preview-row {
+      display: grid;
+      grid-template-columns: 1.1fr .7fr .8fr;
+      border-top: 1px solid var(--hairline-soft);
+    }
+    .preview-row:first-child { border-top: none; background: var(--surface-strong); color: var(--ink); font-weight: 600; }
+    .preview-row span { padding: 9px 10px; min-width: 0; overflow-wrap: anywhere; }
+    .preview-flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .preview-flow span {
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px;
+      color: var(--ink);
+      font-size: 12px;
+      text-align: center;
+    }
+
     /* ── Stats row ── */
     .stats-row {
       display: flex;
@@ -172,7 +252,7 @@
     .stat-num {
       font-size: 36px;
       font-weight: 400;
-      letter-spacing: -0.72px;
+      letter-spacing: 0;
       color: var(--ink);
       line-height: 1;
     }
@@ -371,7 +451,7 @@
     .dev-name {
       font-size: 22px;
       font-weight: 400;
-      letter-spacing: -0.11px;
+      letter-spacing: 0;
       color: var(--ink);
       margin-bottom: 4px;
     }
@@ -423,6 +503,7 @@
 
     /* ── Responsive ── */
     @media (max-width: 900px) {
+      .hero-layout { grid-template-columns: 1fr; }
       .feature-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 700px) {
@@ -436,6 +517,8 @@
       .container { padding: 0 20px; }
       section { padding: 56px 0; }
       .hero { padding: 64px 0 56px; }
+      .display-hero { font-size: 44px; }
+      .display-lg { font-size: 28px; }
       .stats-row { gap: 28px; }
       .feature-grid { grid-template-columns: 1fr; }
       .dev-card { flex-direction: column; gap: 16px; }
@@ -457,22 +540,49 @@
 <!-- ═══ HERO ═══ -->
 <section class="hero">
   <div class="container">
-    <div class="hero-inner">
-      <div class="section-label">충청북도교육청</div>
-      <h1 class="display-hero">소통픽</h1>
-      <p class="hero-sub">
-        엑셀·한글 문서의 수신자 명단을 붙여넣기만 하면<br>
-        소통메신저에서 자동으로 검색하고 선택합니다.
-      </p>
-      <div class="hero-ctas">
-        <a class="btn-download"
-           href="https://github.com/codersongpro/sotong/releases/latest"
-           target="_blank" rel="noopener">⬇&nbsp; 무료 다운로드 (.exe)</a>
-        <a class="btn-text" href="#howto">사용 방법 보기 →</a>
+    <div class="hero-layout">
+      <div class="hero-inner">
+        <div class="section-label">충청북도교육청</div>
+        <h1 class="display-hero">소통픽</h1>
+        <p class="hero-sub">
+          엑셀·한글 문서의 수신자 명단을 붙여넣기만 하면<br>
+          소통메신저에서 자동으로 검색하고 선택합니다.
+        </p>
+        <div class="hero-ctas">
+          <a class="btn-download"
+             href="https://github.com/codersongpro/sotong/releases/latest"
+             target="_blank" rel="noopener">⬇&nbsp; 무료 다운로드 (.exe)</a>
+          <a class="btn-text" href="#howto">사용 방법 보기 →</a>
+        </div>
+        <p class="hero-meta">Windows 전용 &nbsp;·&nbsp; 무설치 &nbsp;·&nbsp; 더블클릭으로 바로 실행</p>
       </div>
-      <p class="hero-meta">Windows 전용 &nbsp;·&nbsp; 무설치 &nbsp;·&nbsp; 더블클릭으로 바로 실행</p>
-    </div>
 
+      <div class="app-preview" aria-label="소통픽 앱 작업 흐름 미리보기">
+        <div class="preview-titlebar">
+          <span>소통픽 v1.7.0</span>
+          <span>준비</span>
+        </div>
+        <div class="preview-tabs">
+          <span>1. 명단 입력</span>
+          <span>2. 위치 설정</span>
+          <span>3. 자동 선택</span>
+        </div>
+        <div class="preview-body">
+          <div class="preview-check">준비 상태 | 명단 3명 · 위치 완료 · 수동 확인 켜짐 · 대기 0.5초</div>
+          <div class="preview-table">
+            <div class="preview-row"><span>소속기관</span><span>이름</span><span>상태</span></div>
+            <div class="preview-row"><span>충주중학교</span><span>홍길동</span><span>추출 완료</span></div>
+            <div class="preview-row"><span>청주고등학교</span><span>김철수</span><span>추출 완료</span></div>
+            <div class="preview-row"><span>충청북도교육청</span><span>이영희</span><span>추출 완료</span></div>
+          </div>
+          <div class="preview-flow">
+            <span>검색 입력</span>
+            <span>첫 결과 선택</span>
+            <span>사용자 추가</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -525,14 +635,14 @@
     </a>
 
     <div class="how-shell">
-      <div class="how-tabs" role="tablist">
-        <button class="how-tab active" onclick="switchTab(this,'tab1')">① 명단 입력</button>
-        <button class="how-tab"        onclick="switchTab(this,'tab2')">② 위치 설정</button>
-        <button class="how-tab"        onclick="switchTab(this,'tab3')">③ 자동 선택</button>
+      <div class="how-tabs" role="tablist" aria-label="사용 방법 단계">
+        <button class="how-tab active" role="tab" aria-selected="true" aria-controls="tab1" id="tab-btn-1" onclick="switchTab(this,'tab1')">① 명단 입력</button>
+        <button class="how-tab" role="tab" aria-selected="false" aria-controls="tab2" id="tab-btn-2" onclick="switchTab(this,'tab2')">② 위치 설정</button>
+        <button class="how-tab" role="tab" aria-selected="false" aria-controls="tab3" id="tab-btn-3" onclick="switchTab(this,'tab3')">③ 자동 선택</button>
       </div>
 
       <!-- 탭 1 -->
-      <div id="tab1" class="how-panel active">
+      <div id="tab1" class="how-panel active" role="tabpanel" aria-labelledby="tab-btn-1">
         <ul class="step-list">
           <li class="step-item">
             <div class="step-num hi">1</div>
@@ -569,7 +679,7 @@
       </div>
 
       <!-- 탭 2 -->
-      <div id="tab2" class="how-panel">
+      <div id="tab2" class="how-panel" role="tabpanel" aria-labelledby="tab-btn-2">
         <div class="notice info" style="margin-bottom:20px;">
           <span class="notice-icon">ℹ</span>
           <div class="notice-body"><strong>최초 1회만 설정하면 됩니다.</strong> 소통메신저 창 위치가 바뀌지 않는 한 재설정 불필요합니다. 자동 선택은 검색 → 결과 클릭 → 선택 버튼 클릭의 3단계로 동작합니다.</div>
@@ -607,7 +717,7 @@
       </div>
 
       <!-- 탭 3 -->
-      <div id="tab3" class="how-panel">
+      <div id="tab3" class="how-panel" role="tabpanel" aria-labelledby="tab-btn-3">
         <ul class="step-list">
           <li class="step-item">
             <div class="step-num hi">1</div>
@@ -706,7 +816,7 @@
         <div class="dev-contact">
           협업 및 피드백: <a href="mailto:dungst.me@gmail.com">dungst.me@gmail.com</a>
         </div>
-        <div class="version-pill">v1.6.2</div>
+        <div class="version-pill">v1.7.0</div>
       </div>
     </div>
   </div>
@@ -740,7 +850,9 @@
   function switchTab(btn, id) {
     document.querySelectorAll('.how-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.how-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.how-tab').forEach(t => t.setAttribute('aria-selected', 'false'));
     btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
     document.getElementById(id).classList.add('active');
   }
 </script>

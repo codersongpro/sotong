@@ -100,7 +100,7 @@ if errorlevel 1 (
 
 rem ---- Build EXE ----
 echo Building exe...
-"%PYTHON%" -m PyInstaller --onefile --windowed --name "sotongpick" --hidden-import pyperclip --hidden-import openpyxl --hidden-import PIL "%SCRIPT%"
+"%PYTHON%" -m PyInstaller --onefile --windowed --name "sotongpick" --add-data "%~dp0org_db.json;." --hidden-import pyperclip --hidden-import openpyxl --hidden-import PIL --hidden-import win32com.client --hidden-import olefile "%SCRIPT%"
 
 if errorlevel 1 (
     echo Build failed.

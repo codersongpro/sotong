@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['C:\\Users\\dungs\\Desktop\\새 폴더\\sotong\\main.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
-    hiddenimports=['pyperclip', 'openpyxl', 'PIL'],
+    datas=[('org_db.json', '.')],
+    hiddenimports=['pyperclip', 'openpyxl', 'PIL', 'win32com.client', 'olefile'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
