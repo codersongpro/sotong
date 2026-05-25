@@ -1,7 +1,7 @@
 """소통픽 — 충북 소통메신저 자동 사용자 선택"""
 
 APP_NAME    = '소통픽'
-APP_VERSION = '1.6.1'
+APP_VERSION = '1.6.2'
 
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, filedialog
